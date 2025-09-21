@@ -232,8 +232,8 @@ a i:hover {
 }
 
 .sidebar .logo {
-    width: 110px;
-    margin-bottom: 10px;
+    width: 220px;
+    margin-bottom: 0px;
 }
 
 .sidebar ul {
@@ -254,7 +254,7 @@ a i:hover {
 .sidebar a:hover {
     border-left: 4px solid #22c55e; /* verde vibrante */
     background-color: #0c4a6e;
-    padding: 6px 10px;
+    padding: 0;
     display: block;
 }
 
@@ -289,3 +289,181 @@ a i:hover {
     }
 }
 
+/* Container principal */
+.card_user {
+    background-color: #fff;
+    padding: 24px;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    max-width: 1200px;
+}
+
+/* Título */
+.card_user h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Tabela de usuários */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+.user-table th {
+    background-color: #f5f5f5;
+    text-align: left;
+    padding: 12px;
+    color: #555;
+}
+.user-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+.user-table tr:hover {
+    background-color: #fafafa;
+}
+
+/* Botão de edição */
+.btn-edit {
+    background-color: #ffc107;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+/* Layout de edição de usuário */
+.edit-user-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Formulário */
+.edit-user-form label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 500;
+    color: #444;
+}
+.edit-user-form input,
+.edit-user-form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.edit-user-form input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+}
+
+/* Botões */
+.edit-user-form .btn {
+    margin-top: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.edit-user-form .btn:hover {
+    background-color: #218838;
+}
+.edit-user-form .btn-cancel {
+    margin-left: 10px;
+    background-color: #6c757d;
+}
+.edit-user-form .btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+/* Informações sobre perfis */
+.profile-info-box {
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+}
+.profile-info-box h3 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #222;
+}
+.profile-info-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+.profile-info-box li {
+    margin-bottom: 6px;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.center-cell {
+    text-align: center;
+}
+
+.user-table tbody tr:nth-child(even) {
+    background-color: #f7f7f7; /* cinza claro */
+}
+
+.user-table tbody tr:nth-child(odd) {
+    background-color: #ffffff; /* branco */
+}
+
+.edit-user-form input[type="text"],
+.edit-user-form input[type="email"],
+.edit-user-form input[type="date"],
+.edit-user-form input[type="file"],
+.edit-user-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.edit-user-form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.edit-user-form label.required::after {
+    content: " *";
+    color: red;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4CAF50;
+    margin-bottom: 10px;
+}

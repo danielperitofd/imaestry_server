@@ -70,15 +70,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
-    birth_date = models.DateField(null=True, blank=True)
-    # outros campos que quiser
-
-    def __str__(self):
-        return f"Perfil de {self.user.username}"
-    
 class Feature(models.Model):
     name = models.CharField(max_length=100)
     module = models.CharField(max_length=50)
@@ -88,3 +79,16 @@ class Feature(models.Model):
     prazo = models.DateField(null=True, blank=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=30, default="Sócio")
+    data_nascimento = models.DateField(null=True, blank=True)
+    telefone = models.CharField(max_length=20, null=True, blank=True)
+    photo = models.ImageField(upload_to="profile_photos/", null=True, blank=True)
+    can_manage_users = models.BooleanField(default=False)
+    can_manage_categories = models.BooleanField(default=False)
+    can_manage_articles = models.BooleanField(default=False)
+    can_view_dashboard = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Perfil de {self.user.username}"

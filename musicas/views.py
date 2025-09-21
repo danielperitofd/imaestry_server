@@ -1,3 +1,12 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .models import Profile
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.shortcuts import redirect
+
 import csv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -12,10 +21,6 @@ from django.utils import timezone
 from .models import Band, Company
 from django.contrib import messages
 from .forms import CompanyForm, BandForm
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.contrib.auth import login
-from django.shortcuts import render, redirect, get_object_or_404
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id="10e22c8b31cd4aff8505ddf6abc48245",
@@ -91,9 +96,14 @@ def song_edit(request, pk):
     return render(request, "musicas/song_form.html", {"form": form})
 
 def song_delete(request, pk):
-    song = get_object_or_404(Song, pk=pk)
-    song.delete()
+    try:
+        song = Song.objects.get(pk=pk)
+        song.delete()
+        messages.success(request, "Música excluída com sucesso.")
+    except Song.DoesNotExist:
+        messages.error(request, "Essa música já foi excluída ou não existe.")
     return redirect("musicas:song_repertorio")
+
 
 # ------------ Modulo Import Musicas CSV -----------------------
 
@@ -524,11 +534,11 @@ def register_manual(request):
             messages.error(request, "Este e-mail já está cadastrado. Tente fazer login.")
             return redirect("musicas:register_manual")
 
-        user = User.objects.create_user(username=email, email=email, password=password1)
-        user.first_name = full_name
-        user.save()
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, user)
+            # user = User.objects.create_user(username=email, email=email, password=password1)
+            user.first_name = full_name
+            user.save()
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
 
         return redirect("musicas:register_team_or_join")
 
@@ -560,3 +570,106 @@ def register_team_or_join(request):
 
 def register_choice(request):
     return render(request, "musicas/register_choice.html")
+
+@login_required
+def config_users(request):
+    users = User.objects.select_related("profile").all()
+    return render(request, "musicas/config_users.html", {"users": users})
+
+@login_required
+def edit_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile, created = Profile.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
+        user.email = request.POST.get("email")
+        user.is_active = 'is_active' in request.POST
+        profile.tipo = request.POST.get("tipo")
+
+        data_nascimento = request.POST.get("data_nascimento")
+        if data_nascimento:
+            profile.data_nascimento = data_nascimento
+        else:
+            profile.data_nascimento = None
+
+        profile.telefone = request.POST.get("telefone")
+        profile.genero = request.POST.get("genero")
+        profile.can_manage_users = 'can_manage_users' in request.POST
+        profile.can_manage_categories = 'can_manage_categories' in request.POST
+        profile.can_manage_articles = 'can_manage_articles' in request.POST
+        profile.can_view_dashboard = 'can_view_dashboard' in request.POST
+
+        if 'photo' in request.FILES:
+            profile.photo = request.FILES['photo']
+
+        user.save()
+        profile.save()
+        messages.success(request, "Usuário atualizado com sucesso.")
+        return redirect("musicas:config_users")
+
+
+    return render(request, "musicas/edit_user.html", {"user": user, "profile": profile})
+
+
+@login_required
+def delete_user(request, user_id):
+    user_to_delete = get_object_or_404(User, id=user_id)
+
+    # Protege contra autoexclusão
+    if user_to_delete == request.user:
+        messages.error(request, "Você não pode excluir a si mesmo.")
+        return redirect("musicas:config_users")
+
+    # Verifica se o usuário logado tem permissão
+    if not hasattr(request.user, "profile") or not request.user.profile.can_manage_users:
+        messages.error(request, "Você não tem permissão para excluir usuários.")
+        return redirect("musicas:config_users")
+
+    if request.method == "POST":
+        user_to_delete.delete()
+        messages.success(request, "Usuário excluído com sucesso.")
+        return redirect("musicas:config_users")
+
+    return redirect("musicas:config_users")
+
+@receiver(post_save, sender=User)
+def create_or_update_profile(sender, instance, created, **kwargs):
+    Profile.objects.get_or_create(user=instance)
+
+@login_required
+def create_user(request):
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        tipo = request.POST.get("tipo")
+        telefone = request.POST.get("telefone")
+        data_nascimento = request.POST.get("data_nascimento")
+        genero = request.POST.get("genero")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "E-mail já cadastrado.")
+            return redirect("musicas:create_user")
+
+        user = User.objects.create_user(username=email, email=email, password=password)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+
+        profile = Profile.objects.get(user=user)
+        profile.tipo = tipo
+        profile.telefone = telefone
+        profile.data_nascimento = data_nascimento
+        profile.genero = genero
+
+        if 'photo' in request.FILES:
+            profile.photo = request.FILES['photo']
+
+        profile.save()
+        messages.success(request, "Usuário criado com sucesso.")
+        return redirect("musicas:config_users")
+
+    return render(request, "musicas/create_user.html")

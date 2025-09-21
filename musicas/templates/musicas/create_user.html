@@ -1,0 +1,51 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card_user">
+    <h2>➕ Criar Novo Usuário</h2>
+    <form method="POST" enctype="multipart/form-data" class="edit-user-form">
+        {% csrf_token %}
+        <label>Nome:</label>
+        <input type="text" name="first_name" placeholder="Digite o nome">
+
+        <label>Sobrenome:</label>
+        <input type="text" name="last_name" placeholder="Digite o sobrenome">
+
+        <label>E-mail:</label>
+        <input type="email" name="email" placeholder="Digite o e-mail">
+
+        <label>Senha:</label>
+        <input type="password" name="password" placeholder="Crie uma senha">
+
+        <label>Data de nascimento:</label>
+        <input type="date" name="data_nascimento">
+
+        <label>Telefone:</label>
+        <input type="text" name="telefone" placeholder="(DDD) 99999-9999">
+
+        <label>Gênero:</label>
+        <select name="genero">
+            <option value="Masculino">Masculino</option>
+            <option value="Feminino">Feminino</option>
+            <option value="Outro">Outro</option>
+        </select>
+
+        <label>Foto de perfil:</label>
+        <input type="file" name="photo">
+        {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="Foto de perfil" style="width: 120px; height: 120px; border-radius: 50%;">
+        {% else %}
+            <p>Sem foto de perfil</p>
+        {% endif %}
+
+
+        <label>Perfil:</label>
+        <select name="tipo">
+            <option value="Sócio">Sócio</option>
+            <option value="Administrador">Administrador</option>
+        </select>
+
+        <button type="submit" class="btn">Salvar</button>
+        <a href="{% url 'musicas:config_users' %}" class="btn btn-cancel">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

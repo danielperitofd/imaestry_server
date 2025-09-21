@@ -101,7 +101,7 @@
 
             <div class="extra">
                 <p><a href="{% url 'account_reset_password' %}">Esqueceu a senha?</a></p>
-                <p>Não tem conta? <a href="{% url 'account_signup' %}">Criar conta</a></p>
+                {% comment %} <p>Não tem conta? <a href="{% url 'account_signup' %}">Criar conta</a></p> {% endcomment %}
                 <p>Não tem conta? <a href="{% url 'musicas:register_choice' %}">Cadastre-se</a></p>
 
             </div>

@@ -1,0 +1,47 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card_user">
+    <h2>👥 Lista de Usuários</h2>
+    <div style="text-align: right; margin-bottom: 10px;">
+        <a href="{% url 'musicas:create_user' %}" class="btn btn-add">➕ Novo Usuário</a>
+    </div>
+
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th class="center-cell">Foto</th>
+                <th class="center-cell">Usuário</th>
+                <th class="center-cell">Nome</th>
+                <th class="center-cell">E-mail</th>
+                <th class="center-cell">Perfil</th>
+                <th class="center-cell">Status</th>
+                {% comment %} <th>Pode Aprovar</th> {% endcomment %}
+                <th class="center-cell">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td class="center-cell">
+                    {% if user.profile.photo %}
+                        <img src="{{ user.profile.photo.url }}" alt="Foto" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #3b73a7ff;">
+                    {% else %}
+                        <span style="color: #aaa;">Sem foto</span>
+                    {% endif %}
+                </td> 
+
+                <td>{{ user.username }}</td>
+                <td>{{ user.get_full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td class="center-cell">{{ user.profile.tipo|default:"-" }}</td>
+                <td class="center-cell">{% if user.is_active %}✅ Ativo{% else %}❌ Inativo{% endif %}</td>
+                {% comment %} <td>{% if user.profile.can_approve %}✅{% else %}❌{% endif %}</td> {% endcomment %}
+                <td class="center-cell">
+                    <a href="{% url 'musicas:edit_user' user.id %}" class="btn-edit">✏️</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

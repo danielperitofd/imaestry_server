@@ -52,6 +52,9 @@
                 {% comment %} <hr style="margin: 20px 0; border-color: #ffffff33;"> {% endcomment %}
                         {% comment %} <li><a href="{% url 'musicas:cadas_membro' %}"class="active">Usuários</a></li> {% endcomment %}
                         <li><a href="{% url 'musicas:config_system' %}"class="active">Configurações</a></li>
+                        {% if request.user.profile.can_manage_users %}
+                        <li><a href="{% url 'musicas:config_users' %}"class="active">Usuários</a></li>
+                        {% endif %}
                         <li><a href="{% url 'account_logout' %}" class="active"> 🚪Sair</a></li>
                     </ul>
                 </nav>

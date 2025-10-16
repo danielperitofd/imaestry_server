@@ -18,7 +18,17 @@ Este primeiro módulo já traz cadastro manual, importação via CSV e integraç
 - 📱 Interface limpa e responsiva para gestão de repertório
 
 -------------------------------------------------------------------------------------------
+## 🛠️ Tecnologias
 
+- **Python 3.12**
+- **Django 5.2**
+- **Gunicorn + Nginx** (produção)
+- **SQLite** (desenvolvimento)
+- **Allauth** (autenticação)
+- **Widget Tweaks** (customização de formulários)
+- **Spotify API** (importação de músicas)
+
+-------------------------------------------------------------------------------------------
 ## 🧱 Estrutura do Projeto
 
 maestrov1/
@@ -29,8 +39,16 @@ maestrov1/
 │ └── templates/musicas/ # Templates HTML organizados por funcionalidade
 └── manage.py
 
+maestrov1/
+├── musicas/                # App principal
+├── staticfiles/            # Arquivos estáticos coletados
+├── media/                  # Uploads de usuários
+├── templates/              # Templates HTML
+├── db.sqlite3              # Banco de dados local
+└── .venv/                  # Ambiente virtual (ignorado no Git)
+
 -------------------------------------------------------------------------------------------
-## 🛠️ Instalação
+## 🛠️ Instalação (VSCODE)
 
 Clone o repositório e configure o ambiente virtual:
 git clone https://github.com/seu-usuario/maestrov1.git
@@ -57,6 +75,29 @@ sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_secret="SEU_CLIENT_SECRET"
 ))
 -------------------------------------------------------------------------------------------
+## 🚀 Instalação local (SERVIDOR)
+
+```bash
+# Clonar o repositório
+git clone https://github.com/danielperitofd/imaestry_server.git
+cd imaestry_server
+
+# Criar e ativar ambiente virtual
+python -m venv .venv
+source .venv/bin/activate
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Aplicar migrações
+python manage.py migrate
+
+# Criar superusuário
+python manage.py createsuperuser
+
+# Rodar servidor local
+python manage.py runserver
+-------------------------------------------------------------------------------------------
 📥 Importação via CSV
 Acesse /musicas/song_import/
 
@@ -75,3 +116,11 @@ Dashboard com estatísticas de repertório
 Sugestão de BPM via análise de áudio
 Múltiplas categorias por música
 -------------------------------------------------------------------------------------------
+🌐 Deploy em produção
+Servidor Linux com Nginx + Gunicorn
+Banco SQLite (temporário)
+Arquivos estáticos servidos via Nginx
+HTTPS via Certbot (Let's Encrypt)
+-------------------------------------------------------------------------------------------
+📄 Licença
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.

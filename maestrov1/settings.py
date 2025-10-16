@@ -12,8 +12,17 @@ SECRET_KEY = 'django-insecure-zzqjfd#2*q*yg88&!u-y@$)lovoaye37&&@s8vy^6c-5&f@@hc
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['imaestry.miroutepe.com.br', 'localhost', '127.0.0.1']
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://imaestry.miroutepe.com.br'
+]
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 ROOT_URLCONF = 'maestrov1.urls'
 WSGI_APPLICATION = 'maestrov1.wsgi.application'
 SITE_ID = 1
@@ -132,6 +141,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "musicas" / "static",
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -139,5 +151,3 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = "/musicas/bem-vindo/"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'

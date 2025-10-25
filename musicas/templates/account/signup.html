@@ -1,0 +1,106 @@
+{% load static %}
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>🎵 Criar Conta no iMaestry</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            height: 100vh;
+        }
+        .left {
+            flex: 1;
+            background-color: #6b21a8;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+        .left img {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .right {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .form-box h2 {
+            color: #6b21a8;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .form-box p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #6b21a8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #581c87;
+        }
+        .extra {
+            margin-top: 10px;
+        }
+        .extra a {
+            color: #6b21a8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="left">
+        <img src="{% static 'musicas/images/logo_maestro_white.png' %}" alt="Logo MaestroV1">
+        <h1>Bem-vindo ao iMaestry</h1>
+        <p>Cadastre-se e comece a montar seu repertório musical</p>
+    </div>
+    <div class="right">
+        <div class="form-box">
+            <h2>Criar sua conta</h2>
+            <form method="post" action="{% url 'account_signup' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn">Criar Conta</button>
+            </form>
+            <div class="extra">
+                <p>Já tem conta? 
+                    <a href="{% provider_login_url 'google' %}" class="google-btn"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">Entrar com Google</a>
+                </p>
+                <a href="{% provider_login_url 'google' %}" class="btn" style="background-color: #f8f8f8ff;">Criar conta com Google</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>🏢 Criar Organização e Equipe Musical</h2>
+<p style="color: #555;">
+Você está criando uma nova organização (igreja, ministério ou banda) e vinculando uma equipe musical a ela. 
+Seu perfil será automaticamente adicionado como membro dessa equipe.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Nome da Organização ou Igreja</legend>
+        {{ company_form.as_p }}
+    </fieldset>
+
+    <fieldset>
+        <legend>Nome da Equipe Musical</legend>
+        {{ band_form.as_p }}
+    </fieldset>
+
+    <button type="submit" class="btn">Salvar</button>
+</form>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>Olá {{ name }}, seja bem-vindo ao iMaestry!</h2>
+{% comment %} <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+    {% if photo %}
+        <img src="{{ photo }}" alt="Foto de perfil" class="profile-pic">
+    {% else %}
+        <p style="color: red;">Foto não disponível</p>
+    {% endif %}
+    <p style="margin: 0;">mail: {{ email }}</p>
+</div> {% endcomment %}
+
+<p>Agora você pode criar sua organização, montar equipes e começar a cadastrar seu repertório musical!</p>
+
+<h3 style="margin-top: 40px;">🎛️ Painel de Acesso Rápido</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px;">
+    <a href="{% url 'musicas:song_repertorio' %}" class="card">
+        <h4>🎶 Repertório</h4>
+        <p>Veja todas as músicas cadastradas</p>
+    </a>
+    <a href="{% url 'musicas:song_create' %}" class="card">
+        <h4>➕ Adicionar Música</h4>
+        <p>Cadastre uma nova música manualmente</p>
+    </a>
+    <a href="{% url 'musicas:import_from_spotify' %}" class="card">
+        <h4>🎧 Importar do Spotify</h4>
+        <p>Traga músicas direto das playlists</p>
+    </a>
+    <a href="{% url 'musicas:roadmap' %}" class="card">
+        <h4>📋 Roadmap</h4>
+        <p>Veja o plano de evolução do MaestroV1</p>
+    </a>
+    <a href="{% url 'musicas:create_company_and_band' %}" class="card">
+        <h4>🎤 Criar Organização</h4>
+        <p>Monte sua equipe musical e comece a organizar</p>
+    </a>
+</div>
+{% endblock %}

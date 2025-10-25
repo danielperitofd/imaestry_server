@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    server_name imaestry.miroutepe.com.br;
+
+    location /static/ {
+        alias /var/www/imaestry_server/staticfiles/;
+    }
+
+    location /media/ {
+        alias /var/www/imaestry_server/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/var/www/imaestry_server/imaestry.sock;
+    }
+}
+

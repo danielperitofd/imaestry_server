@@ -1,0 +1,36 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>REPERTÓRIO</h2>
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'musicas:song_create' %}" class="btn">+ Adicionar Música</a>
+    <a href="{% url 'musicas:song_import' %}" class="btn">📂 Importar File CSV</a>
+    <a href="{% url 'musicas:import_from_spotify' %}" class="btn">🎧 Import Playlist Spotify</a>
+    <a href="{% url 'musicas:import_top_country' %}" class="btn">🌍Import Top 100 do País</a>
+</div>
+
+<table>
+    <tr>
+        <th>Título</th>
+        <th>Artista</th>
+        <th>Categoria</th>
+        <th>BPM</th>
+        <th>Tom</th>
+        <th>Ações</th>
+    </tr>
+    {% for song in songs %}
+    <tr>
+        <td>{{ song.title }}</td>
+        <td>{{ song.artist }}</td>
+        <td>{{ song.get_category_display }}</td>
+        <td>{{ song.bpm }}</td>
+        <td>{{ song.key }}</td>
+        <td>
+            <a href="{% url 'musicas:song_edit' song.pk %}" title="Editar"><i class="fas fa-pencil-alt"></i></a>
+            <a href="{% url 'musicas:song_delete' song.pk %}" title="Excluir"><i class="fas fa-trash"></i></a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Nenhuma música cadastrada.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

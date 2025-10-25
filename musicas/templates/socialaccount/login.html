@@ -1,0 +1,83 @@
+{% load static socialaccount %}
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>🔐 Entrar com Google - MaestroV1</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            height: 100vh;
+        }
+        .left {
+            flex: 1;
+            background-color: #6b21a8;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+        .left img {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .right {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box {
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #6b21a8;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #db4437;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #c1351d;
+        }
+    </style>
+</head>
+<body>
+    <div class="left">
+        <img src="{% static 'musicas/images/logo_maestro_white.png' %}" alt="Logo MaestroV1">
+        <h1>Entrar com Google</h1>
+        <p>Conecte-se com segurança e comece a montar seu repertório 🎶</p>
+    </div>
+    <div class="right">
+        <div class="box">
+            <h2>Escolha sua conta Google</h2>
+            <p>Você será redirecionado para o Google para confirmar o login.</p>
+            <a href="{% provider_login_url 'google' %}" class="btn">🔐 Entrar com Google</a>
+        </div>
+    </div>
+</body>
+</html>

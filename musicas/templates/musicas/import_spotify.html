@@ -1,0 +1,18 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>🎧 Importar Playlist do Spotify</h2>
+
+<form method="post" style="margin-top: 20px;">
+    {% csrf_token %}
+    <label for="playlist_url"><strong>URL da Playlist, Álbum ou Música:</strong></label><br><p>
+    <input type="text" name="playlist_url" size="80" placeholder="Cole aqui o link do Spotify" required><br><br>
+    <button type="submit" class="btn">Buscar músicas</button>
+</form>
+
+<p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+    Exemplo de link válido: <br>
+    <code>https://open.spotify.com/playlist/70djktJymzt5qMAjQLIdQ9</code><br>
+    <code>https://open.spotify.com/album/5tysvCEnXkJtWQhmtWUDB3</code><br>
+    <code>https://open.spotify.com/track/2hZPXkQyHbYUeiBRAn1fLd</code>
+</p>
+{% endblock %}

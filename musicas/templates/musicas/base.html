@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>iMaestry</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar lateral -->
+        {% if user.is_authenticated %}
+            <aside class="sidebar">
+                <div style="text-align: center;">
+                    <a href="{% url 'musicas:welcome' %}" class="top_logo">
+                        <img src="{% static 'musicas/images/logo_imaestry_white.png' %}" alt="Logo iMaestro" class="logo">
+                    </a>
+                </div>
+
+                <div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'musicas:perfil_membro' %}" style="cursor: pointer;">
+                            <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+                                <img src="{% if photo %}{{ photo }}{% else %}{% static 'musicas/images/avatar_padrao_man.jpg' %}{% endif %}" 
+                                alt="Foto de perfil" 
+                                style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #00ff37ff;">
+
+                                <div style="line-height: 1.2;">
+                                    <strong style="font-size: 14px;">{{ name }}</strong><br>
+                                    <span style="font-size: 12px; color: #ffffffff;">{{ email }}</span>
+                                </div>                            
+                            </div>
+                        </a>
+                        <hr style="margin: 20px 0; border-color: #ffffff33;">
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="btn">Entrar com Google</a>
+                    {% endif %}
+                </div>
+
+                <nav>
+                    <ul>
+                        <li><a href="{% url 'musicas:welcome' %}" class="active">🏠 Home</a></li>
+                        <li><a href="{% url 'musicas:song_repertorio' %}"class="active">🎶 Repertório</a></li>
+                        <li><a href="{% url 'musicas:song_create' %}"class="active">➕ Adicionar Música</a></li>
+                        <li><a href="{% url 'musicas:import_from_spotify' %}"class="active">🎧 Importar do Spotify</a></li>
+                        <li><a href="{% url 'musicas:roadmap' %}"class="active">📋 Roadmap</a></li>
+                        <li><a href="{% url 'musicas:create_company_and_band' %}"class="active">🎤 Organização</a></li>
+                <!-- Separador visual -->
+                <hr style="margin: 20px 0; border-color: #ffffff33;">
+                        <li>Administração</li>
+                {% comment %} <hr style="margin: 20px 0; border-color: #ffffff33;"> {% endcomment %}
+                        {% comment %} <li><a href="{% url 'musicas:cadas_membro' %}"class="active">Usuários</a></li> {% endcomment %}
+                        <li><a href="{% url 'musicas:config_system' %}"class="active">Configurações</a></li>
+                        {% if request.user.profile.can_manage_users %}
+                        <li><a href="{% url 'musicas:config_users' %}"class="active">Usuários</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'account_logout' %}" class="active"> 🚪Sair</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Separador visual -->
+                <hr style="margin: 20px 0; border-color: #ffffff33;">
+
+            </aside>
+        {% endif %}
+
+        <hr style="margin: 20px 0; border-color: #ffffff33;">
+
+        <!-- Conteúdo principal -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

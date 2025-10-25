@@ -1,0 +1,14 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>Importar Músicas (CSV)</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv_file" accept=".csv" required>
+    <button type="submit" class="btn">Importar</button>
+    <a href="{% url 'musicas:song_repertorio' %}" class="btn">Voltar</a>
+</form>
+
+<p><strong>Dica:</strong> O CSV deve ter cabeçalho com as seguintes colunas:</p>
+<code>title,artist,key,bpm,lyrics_excerpt,links,category,themes,notes</code>
+{% endblock %}

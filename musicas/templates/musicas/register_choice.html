@@ -1,0 +1,11 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Como deseja se cadastrar?</h2>
+    <div class="options">
+        <a href="{% url 'account_login' %}" class="btn btn-google">Entrar com Google</a>
+        <hr>
+        <a href="{% url 'musicas:register_manual' %}" class="btn btn-manual">Cadastro Manual</a>
+    </div>
+</div>
+{% endblock %}

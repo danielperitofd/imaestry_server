@@ -1,0 +1,14 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Agora escolha:</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" name="action" value="join" class="btn">Ingressar em Equipe</button>
+        <input type="text" name="team_code" placeholder="Código da Equipe">
+        <hr>
+        <button type="submit" name="action" value="create" class="btn">Cadastrar Nova Equipe</button>
+        <input type="text" name="team_name" placeholder="Nome da Equipe">
+    </form>
+</div>
+{% endblock %}

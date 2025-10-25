@@ -1,0 +1,111 @@
+{% load static %}
+{% load socialaccount %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrar no iMaestry</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            height: 100vh;
+        }
+        .left {
+            flex: 1;
+            background-color: #0c4a6e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+        .left img {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .right {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #0c4a6e;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0c4a6e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #075985;
+        }
+        .extra {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .extra a {
+            color: #0c4a6e;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="left">
+        <img src="{% static 'musicas/images/logo_imaestry_white.png' %}" alt="Logo MaestroV1">
+        <h1>Bem-vindo</h1>Inteligência e música em harmonia  
+    </div>
+    <div class="right">
+        <div class="form-box">
+            <h2>Entrar na sua conta</h2>
+            <form method="post" action="{% url 'account_login' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_login">Email ou nome de usuário</label>
+                    {{ form.login }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Senha</label>
+                    {{ form.password }}
+                </div>
+                <div class="form-group">
+                    {{ form.remember }}
+                    <label for="id_remember">Lembrar de mim</label>
+                </div>
+                <p><button type="submit" class="btn">Entrar</button></p>
+                <p><button type="submit" class="btn"><a href="{% provider_login_url 'google' %}" class="btn">Entrar com Google</a></button></p>
+            </form>
+
+            <div class="extra">
+                <p><a href="{% url 'account_reset_password' %}">Esqueceu a senha?</a></p>
+                {% comment %} <p>Não tem conta? <a href="{% url 'account_signup' %}">Criar conta</a></p> {% endcomment %}
+                <p>Não tem conta? <a href="{% url 'musicas:register_choice' %}">Cadastre-se</a></p>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

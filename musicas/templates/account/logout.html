@@ -1,0 +1,58 @@
+{% load static %}
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>🚪 Sair do iMaestry</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            color: #ccc;
+        }
+        .btn {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background-color: #e11d48;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #be123c;
+        }
+    </style>
+</head>
+<body>
+    <img src="{% static 'musicas/images/logo_maestro_white.png' %}" alt="Logo MaestroV1" class="logo">
+    <h1>Deseja sair?</h1>
+    <p>Você está prestes a encerrar sua sessão no MaestroV1.</p>
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn">🚪 Confirmar Logout</button>
+    </form>
+</body>
+</html>

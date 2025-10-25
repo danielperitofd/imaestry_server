@@ -1,0 +1,17 @@
+[Unit]
+Description=Gunicorn daemon for Django project imaestry
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/imaestry_server
+ExecStart=/var/www/imaestry_server/.venv/bin/gunicorn --workers 3 --access-logfile - \
+  --bind unix:/var/www/imaestry_server/imaestry.sock --umask 000 \
+  maestrov1.wsgi:application
+
+
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,34 @@
+# Django / Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.pot
+
+# Virtualenv
+.venv/
+env/
+venv/
+
+# Static e Media
+/staticfiles/
+media/
+
+# Configurações e backups locais
+#*.bak
+#*.old
+#*.swp
+#BACK_CONFIG_SERVICES/
+#*.sock
+
+# IDEs
+.vscode/
+.idea/
+
+# Cloudflare, systemd, nginx
+#/etc/
+#*.service
+#*.yml
+

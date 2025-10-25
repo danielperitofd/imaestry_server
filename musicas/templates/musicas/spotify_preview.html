@@ -1,0 +1,70 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>Pré-visualização das músicas</h2>
+
+<form method="post" action="{% url 'musicas:confirm_spotify_import' %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <th>Título</th>
+            <th>Artista</th>
+            <th>Link</th>
+            <th>Categoria</th>
+            <th>BPM</th>
+            <th>TOM</th>
+            <th>Áudio</th>
+            <th>Letra</th>
+            <th>Cifra</th>
+            <th>Ações</th>
+        </tr>
+        {% for song in songs %}
+        <tr id="row_{{ forloop.counter }}">
+            <td>
+                <input type="hidden" name="title_{{ forloop.counter }}" value="{{ song.title }}">
+                {{ song.title }}
+            </td>
+            <td>
+                <input type="hidden" name="artist_{{ forloop.counter }}" value="{{ song.artist }}">
+                {{ song.artist }}
+            </td>
+            <td>
+                <input type="hidden" name="links_{{ forloop.counter }}" value="{{ song.links }}">
+                <a href="{{ song.links }}" target="_blank">Ouvir</a>
+            </td>
+            <td>
+                <select name="category_{{ forloop.counter }}">
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}" {% if cat.name == song.category %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="number" name="bpm_{{ forloop.counter }}" value="{{ song.bpm }}" min="40" max="320" placeholder="BPM" class="input" style="width: 60px;">
+            </td>
+            <td>
+                <select name="key_{{ forloop.counter }}">
+                    {% for tone in tones %}
+                        <option value="{{ tone }}" {% if tone == song.key %}selected{% endif %}>{{ tone }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="url" name="audio_link_{{ forloop.counter }}" value="{{ song.audio_link }}">
+            </td>
+            <td>
+                <input type="url" name="lyrics_link_{{ forloop.counter }}" value="{{ song.lyrics_link }}">
+            </td>
+            <td>
+                <input type="url" name="chord_link_{{ forloop.counter }}" value="{{ song.chord_link }}">
+            </td>
+            <td>
+                <button type="button" onclick="document.getElementById('row_{{ forloop.counter }}').remove()"><i class="fas fa-trash"></i></button>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="hidden" name="total" value="{{ songs|length }}">
+    <button type="submit" class="btn">Importar músicas</button>
+</form>
+{% endblock %}

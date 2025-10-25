@@ -1,0 +1,21 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>📊 Painel de Progresso do MaestroV1</h2>
+
+{% for key, module in progress_data.items %}
+<div class="module-box">
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ module.percent }}%;"></div>
+        </div>
+        <div class="progress-label">{{ module.percent }}%</div>
+    </div>
+    <h3>{{ module.title }}</h3>
+    <ul>
+        {% for item, done in module.items %}
+            <li><span class="status-icon">{% if done %}✅{% else %}🔄{% endif %}</span> {{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+{% endblock %}

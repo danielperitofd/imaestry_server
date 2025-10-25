@@ -1,0 +1,25 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Cadastro Manual</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label>Nome e Sobrenome:</label>
+        <input type="text" name="full_name" required minlength="15">
+
+        <label>E-mail:</label>
+        <input type="email" name="email" required>
+
+        <label>Data de Nascimento:</label>
+        <input type="date" name="birth_date" required max="{{ today|date:'Y-m-d' }}">
+
+        <label>Senha:</label>
+        <input type="password" name="password1" required>
+
+        <label>Confirmar Senha:</label>
+        <input type="password" name="password2" required>
+
+        <button type="submit" class="btn">Registrar</button>
+    </form>
+</div>
+{% endblock %}

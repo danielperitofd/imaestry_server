@@ -1,0 +1,82 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<div class="card_user">
+    <h2>✏️ Editar Usuário</h2>
+    <div class="edit-user-grid">
+        <form method="POST" class="edit-user-form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <label class="required">Nome:</label>
+            <input type="text" name="first_name" value="{{ user.first_name }}" placeholder="Digite o nome">
+
+            <label class="required">Sobrenome:</label>
+            <input type="text" name="last_name" value="{{ user.last_name }}" placeholder="Digite o sobrenome">
+
+            <label class="required">E-mail:</label>
+            <input type="email" name="email" value="{{ user.email }}" placeholder="Digite o e-mail">
+
+            <label class="required">Data de nascimento:</label>
+            <input type="date" name="data_nascimento" value="{{ profile.data_nascimento|date:'Y-m-d' }}">
+
+            <label class="required">Telefone:</label>
+            <input type="text" name="telefone" value="{{ profile.telefone }}" placeholder="(DDD) 99999-9999">
+
+            <label class="required">Gênero:</label>
+            <select name="genero">
+                <option value="Masculino" {% if profile.genero == "Masculino" %}selected{% endif %}>Masculino</option>
+                <option value="Feminino" {% if profile.genero == "Feminino" %}selected{% endif %}>Feminino</option>
+                <option value="Outro" {% if profile.genero == "Outro" %}selected{% endif %}>Outro</option>
+            </select>
+
+            <label>Foto de perfil:</label>
+                {% if profile.photo %}
+                    <img src="{{ profile.photo.url }}" alt="Foto atual" class="avatar-preview">
+                {% else %}
+                    {% if profile.genero == "Feminino" %}
+                        <img src="/static/img/avatar_feminino.png" class="avatar-preview">
+                    {% else %}
+                        <img src="/static/img/avatar_masculino.png" class="avatar-preview">
+                    {% endif %}
+                {% endif %}
+
+            <input type="file" name="photo">
+
+            <label class="required">Perfil:</label>
+            <select name="tipo">
+                <option value="Sócio" {% if profile.tipo == "Sócio" %}selected{% endif %}>Sócio</option>
+                <option value="Administrador" {% if profile.tipo == "Administrador" %}selected{% endif %}>Administrador</option>
+            </select>
+
+            <label><input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}> Usuário ativo</label>
+
+            <div><!-- ✅ Permissões de Acesso (dentro do form!) -->
+                <h3>Permissões de Acesso</h3>
+                <label>
+                    <input type="checkbox" name="can_view_dashboard" {% if profile.can_view_dashboard %}checked{% endif %}> Acessar dashboard <input type="checkbox" name="can_manage_articles" {% if profile.can_manage_articles %}checked{% endif %}> Gerenciar artigos <input type="checkbox" name="can_manage_users" {% if profile.can_manage_users %}checked{% endif %}> Gerenciar usuários <input type="checkbox" name="can_manage_categories" {% if profile.can_manage_categories %}checked{% endif %}> Gerenciar categorias 
+                </label>
+            </div>
+
+            <button type="submit" class="btn">Salvar</button>
+            <a href="{% url 'musicas:config_users' %}" class="btn btn-cancel">Cancelar</a>
+        </form>
+
+
+        <div class="profile-info-box">
+            <h3>Informações sobre Perfis</h3>
+            <ul>
+                <li><strong>Administrador:</strong> Acesso total ao sistema</li>
+                <li><strong>Gestor:</strong> Acessa todos os times</li>
+                <li><strong>Sócio:</strong> Acessa apenas seu time</li>
+                <li><strong>Financeiro:</strong> Visualiza solicitações aprovadas</li>
+            </ul>
+
+        </div>
+        <!-- Formulário separado para exclusão -->
+        <form method="POST" action="{% url 'musicas:delete_user' user.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+    </div>
+</div>
+        
+{% endblock %}

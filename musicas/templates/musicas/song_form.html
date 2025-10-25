@@ -1,0 +1,33 @@
+{% extends "musicas/base.html" %}
+{% block content %}
+<h2>Adicionar/Editar Música</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="id_title">Título</label>
+    {{ form.title }}
+
+    <label for="id_artist">Artista</label>
+    {{ form.artist }}
+
+    <label for="id_key">Tom</label>
+    {{ form.key }}
+
+    <label for="id_bpm">BPM</label>
+    {{ form.bpm }}
+
+    <label for="id_audio_link">Link do Áudio (Spotify/YouTube)</label>
+    {{ form.audio_link }}
+
+    <label for="id_lyrics_link">Link da Letra</label>
+    {{ form.lyrics_link }}
+
+    <label for="id_chord_link">Link da Cifra</label>
+    {{ form.chord_link }}
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Salvar</button>
+    <a href="{% url 'musicas:song_repertorio' %}" class="btn">Voltar</a>
+</form>
+{% endblock %}

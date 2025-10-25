@@ -1,0 +1,90 @@
+Listagem de caminhos de pasta para o volume BackManut
+O número de série do volume é A4B9-2169
+F:.
+│   .cache
+│   .gitignore
+│   db.sqlite3
+│   estrutura.txt
+│   manage.py
+│   musicas.csv
+│   README.md
+│   requirements.txt
+│   
+├───IDEIAS tela
+│       admin_perfil.png
+│       base.png
+│       cad_memb_solo.png
+│       Equipe.png
+│       Repertorio - card por musica.JPG
+│       Repertorio - por artista.JPG
+│       Repertorio - por musica.JPG
+│       
+├───maestrov1
+│   │   asgi.py
+│   │   settings.py
+│   │   urls.py
+│   │   wsgi.py
+│   │   __init__.py
+│   │   
+│   └───__pycache__
+│           settings.cpython-313.pyc
+│           urls.cpython-313.pyc
+│           wsgi.cpython-313.pyc
+│           __init__.cpython-313.pyc
+│           
+└───musicas
+    │   admin.py
+    │   apps.py
+    │   forms.py
+    │   models.py
+    │   signals.py
+    │   spotify_client.py
+    │   tests.py
+    │   urls.py
+    │   views.py
+    │   __init__.py
+    │   
+    ├───migrations
+    │   │   0001_initial.py
+    │   │   0002_category.py
+    │   │   0003_band_song_band.py
+    │   │   0004_userprofile.py
+    │   │   0005_company_band_members_band_company_feature.py
+    │   │   0006_alter_band_company.py
+    │   │   __init__.py
+    │   │   
+    │   └───__pycache__
+    |
+    │           
+    ├───static
+    │   ├───css
+    │   │   |___style.css
+    │   │       
+    │   └───musicas
+    │       └───images
+    │               logo_circle.png
+    │               logo_maestro_black.png
+    │               logo_maestro_white.png
+    │               
+    ├───templates
+    │   ├───account
+    │   │       login.html
+    │   │       logout.html
+    │   │       signup.html
+    │   │       
+    │   ├───musicas
+    │   │       base.html
+    │   │       create_company_and_band.html
+    │   │       import_spotify.html
+    │   │       roadmap.html
+    │   │       song_form.html
+    │   │       song_import.html
+    │   │       song_repertorio.html
+    │   │       spotify_preview.html
+    │   │       welcome.html
+    │   │       
+    │   └───socialaccount
+    │           login.html
+    │           
+    └───__pycache__
+            

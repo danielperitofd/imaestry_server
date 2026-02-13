@@ -5,3 +5,4 @@ Pillow
 requests
 gunicorn
 whitenoise
+psycopg2-binary

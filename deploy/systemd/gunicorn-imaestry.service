@@ -1,0 +1,24 @@
+[Unit]
+Description=gunicorn daemon for imaestry (Django)
+Requires=network.target
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/imaestry_server
+Environment="DJANGO_SETTINGS_MODULE=imaestry.settings"
+EnvironmentFile=/var/www/imaestry_server/.env
+ExecStart=/var/www/imaestry_server/.venv/bin/gunicorn \
+  --workers 3 \
+  --bind unix:/run/gunicorn-imaestry.sock \
+  --access-logfile - \
+  --error-logfile - \
+  imaestry.wsgi:application
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30
+KillSignal=SIGQUIT
+
+[Install]
+WantedBy=multi-user.target

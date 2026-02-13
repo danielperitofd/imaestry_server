@@ -1,0 +1,109 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Manutenção do Banco{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Admin Tools</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Manutenção do Banco</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Export Section -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center mb-4">
+                <span class="badge text-bg-success rounded-pill px-3 py-2 me-3">
+                    <i class="bi bi-download me-1"></i> Exportar
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-1">Backup de Dados</h5>
+                    <p class="text-muted mb-0 small">Exporte os dados do sistema em formato JSON</p>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'db_export' %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="form-label fw-bold">O que deseja exportar?</label>
+                    <select name="export_type" class="form-select form-select-lg" required>
+                        <option value="">Selecione uma opção...</option>
+                        <option value="teams">Equipes</option>
+                        <option value="setlists">Setlists</option>
+                        <option value="repertorio">Repertório (Músicas)</option>
+                        <option value="apis">Configurações de APIs</option>
+                        <option value="all">Todo o Banco</option>
+                    </select>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill">
+                        <i class="bi bi-download me-2"></i> Exportar Backup
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Section -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center mb-4">
+                <span class="badge text-bg-primary rounded-pill px-3 py-2 me-3">
+                    <i class="bi bi-upload me-1"></i> Importar
+                </span>
+                <div>
+                    <h5 class="fw-bold mb-1">Restaurar Dados</h5>
+                    <p class="text-muted mb-0 small">Importe dados a partir de um arquivo JSON</p>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'db_import' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Selecione o arquivo de backup</label>
+                    <input type="file" name="import_file" class="form-control form-control-lg" accept=".json" required>
+                    <div class="form-text">O sistema identificará automaticamente o tipo de dados.</div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="bi bi-upload me-2"></i> Importar Backup
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<div class="row mt-4">
+    <div class="col-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+    <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Informações</h6>
+    <ul class="mb-0 text-muted small">
+        <li><strong>Equipes:</strong> Exporta e importa equipes com membros e líderes.</li>
+        <li><strong>Setlists:</strong> Exporta e importa setlists vinculados às equipes.</li>
+        <li><strong>Repertório:</strong> Exporta e importa todas as músicas cadastradas.</li>
+        <li><strong>APIs:</strong> Exporta e importa configurações de chaves de API.</li>
+        <li><strong>Todo o Banco:</strong> Exporta tudo acima em um único arquivo.</li>
+    </ul>
+</div>
+{% endblock %}

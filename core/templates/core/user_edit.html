@@ -1,0 +1,224 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Usuário{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Configurações</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                {% if is_self_edit %}
+                    <li class="breadcrumb-item active" aria-current="page">Editar Perfil</li>
+                {% else %}
+                    <li class="breadcrumb-item"><a href="{% url 'settings_users' %}">Usuários</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Editar</li>
+                {% endif %}
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    <h5 class="fw-bold mb-4">{% if is_self_edit %}Editar Perfil{% else %}Editar Usuário: {{ user_to_edit.username }}{% endif %}</h5>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-3 text-center mb-3">
+                <div class="mb-3">
+                    <label class="form-label d-block fw-bold">Foto</label>
+                    <div class="position-relative d-inline-block" style="cursor: pointer;" onclick="document.getElementById('id_photo').click()">
+                        {% if musician and musician.photo %}
+                        <img id="photo-preview" src="{{ musician.photo.url }}" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                        <div id="photo-placeholder" class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center border" style="width: 120px; height: 120px; font-size: 2rem;">
+                            {{ user_to_edit.username|slice:":1"|upper }}
+                        </div>
+                        <img id="photo-preview" class="rounded-circle border d-none" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% endif %}
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-camera-fill fs-3 text-white" style="opacity: 0.7; text-shadow: 0 0 5px rgba(0,0,0,0.5);"></i>
+                        </div>
+                        {{ form.photo }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_username" class="form-label fw-bold">Usuário</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label fw-bold">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_first_name" class="form-label fw-bold">Nome</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_last_name" class="form-label fw-bold">Sobrenome</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="mt-4">
+             <h5 class="fw-bold mb-3"><i class="bi bi-music-note-list me-2 text-success"></i>Habilidades Musicais</h5>
+             <div class="skills-grid">
+                {% for skill in skills %}
+                <div class="skill-card {% if skill.id in form.skills.value %}active{% endif %}" onclick="toggleSkill(this)">
+                    <input type="checkbox" name="skills" value="{{ skill.id }}" class="d-none" {% if skill.id in form.skills.value %}checked{% endif %}>
+                    <div class="skill-icon">
+                        {% if skill.icon_class %}
+                        <i class="bi {{ skill.icon_class }}"></i>
+                        {% else %}
+                        <i class="bi bi-music-note-beamed"></i>
+                        {% endif %}
+                    </div>
+                    <span class="skill-name">{{ skill.name }}</span>
+                    <div class="skill-check">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Password Section -->
+        <div class="mt-4">
+            <hr class="my-3 text-muted">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock-fill me-2 text-warning"></i>Alterar Senha</h5>
+            <div class="row g-3">
+                 <div class="col-md-6">
+                    <label for="id_new_password" class="form-label fw-bold">Nova Senha</label>
+                    {{ form.new_password }}
+                    <div class="form-text">Deixe em branco para manter a atual.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_confirm_password" class="form-label fw-bold">Confirmar Senha</label>
+                    {{ form.confirm_password }}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mt-4 text-end">
+            {% if is_self_edit %}
+                <a href="{% url 'home' %}" class="btn btn-light rounded-pill px-4 me-2">Cancelar</a>
+            {% else %}
+                <a href="{% url 'settings_users' %}" class="btn btn-light rounded-pill px-4 me-2">Cancelar</a>
+            {% endif %}
+            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold">Salvar Alterações</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Skills Grid - Card Style (copied from registration.html) */
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    .skill-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 10px;
+        border-radius: 16px;
+        border: 2px solid var(--border-color, #dee2e6);
+        background: var(--card-bg, #ffffff);
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+        text-align: center;
+    }
+    .skill-card:hover {
+        border-color: var(--bs-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .skill-card.active {
+        border-color: var(--bs-primary);
+        background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+    }
+    .skill-card.active .skill-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .skill-card.active .skill-icon {
+        background: var(--bs-primary);
+        color: white;
+    }
+    .skill-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+        background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+        color: var(--bs-primary);
+        transition: all 0.25s ease;
+    }
+    .skill-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--title-color, #333);
+    }
+    .skill-check {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        color: var(--bs-primary);
+        font-size: 1rem;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.25s ease;
+    }
+</style>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('photo-preview');
+                var placeholder = document.getElementById('photo-placeholder');
+
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Toggle skill card selection
+    function toggleSkill(card) {
+        var checkbox = card.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        card.classList.toggle('active', checkbox.checked);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mark pre-selected skills based on the hidden checkboxes
+        document.querySelectorAll('.skill-card input[type="checkbox"]:checked').forEach(function (cb) {
+            cb.closest('.skill-card').classList.add('active');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Configurar APIs{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Admin Tools</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Configurar APIs</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h5 class="fw-bold mb-1">Configuração de APIs</h5>
+            <p class="text-muted mb-0 small">Gerencie as chaves de API para serviços externos (YouTube, Spotify, etc.)
+            </p>
+        </div>
+        <span class="badge text-bg-primary rounded-pill px-3 py-2">
+            <i class="bi bi-key me-1"></i> APIs
+        </span>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-4">
+            <!-- YouTube / Google -->
+            <div class="col-12">
+                <div class="card bg-light border-0 rounded-3 p-3">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-youtube text-danger me-2"></i>YouTube (Google API)</h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Google API Key</label>
+                            <input type="text" name="google_api_key" class="form-control"
+                                value="{{ config.google_api_key|default:'' }}" placeholder="AIza...">
+                            <div class="form-text">Obtenha em <a href="https://console.cloud.google.com/"
+                                    target="_blank">Google Cloud Console</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spotify -->
+            <div class="col-12">
+                <div class="card bg-light border-0 rounded-3 p-3">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-spotify text-success me-2"></i>Spotify</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Client ID</label>
+                            <input type="text" name="spotify_client_id" class="form-control"
+                                value="{{ config.spotify_client_id|default:'' }}" placeholder="Spotify Client ID">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Client Secret</label>
+                            <input type="password" name="spotify_client_secret" class="form-control"
+                                value="{{ config.spotify_client_secret|default:'' }}"
+                                placeholder="Spotify Client Secret">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-text">Obtenha em <a href="https://developer.spotify.com/dashboard"
+                                    target="_blank">Spotify Developer Dashboard</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Services (no API key needed) -->
+            <div class="col-12">
+                <div class="card bg-light border-0 rounded-3 p-3">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-toggles me-2"></i>Outros Serviços</h6>
+                    <p class="text-muted small mb-3">Estes serviços não precisam de chave API, apenas ative/desative
+                        conforme necessário.</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="deezer_enabled" id="deezerEnabled"
+                                    {% if config.deezer_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="deezerEnabled">
+                                    <i class="bi bi-music-note-list me-1"></i> Deezer
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="cifra_enabled" id="cifraEnabled"
+                                    {% if config.cifra_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="cifraEnabled">
+                                    <i class="bi bi-music-note me-1"></i> Cifra Club
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="letras_enabled" id="letrasEnabled"
+                                    {% if config.letras_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="letrasEnabled">
+                                    <i class="bi bi-type me-1"></i> Letras.mus.br
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-end">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary me-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold">
+                <i class="bi bi-check2 me-1"></i> Salvar Configurações
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Criar Equipe | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Nova Equipe</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'create_team' %}">Equipe</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Criar</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row g-4">
+        <!-- LEFT: Form Fields -->
+        <div class="col-lg-8">
+
+            <!-- Banner / Foto Upload -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-body p-0">
+                    <div class="team-banner-upload position-relative" id="bannerArea"
+                        onclick="document.getElementById('id_photo').click()" style="cursor: pointer;">
+
+                        <!-- Preview image (hidden by default) -->
+                        <img id="banner-preview" class="d-none" alt="Preview">
+
+                        <!-- Placeholder content -->
+                        <div id="banner-placeholder"
+                            class="d-flex flex-column align-items-center justify-content-center py-5">
+                            <div class="banner-icon-circle mb-3">
+                                <i class="bi bi-camera-fill"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">Foto ou Banner da Equipe</h6>
+                            <p class="text-muted small mb-0">Clique para selecionar uma imagem (opcional)</p>
+                            <p class="text-muted small mb-0" style="font-size: 0.7rem;">Tamanho recomendado: 1200×400px
+                            </p>
+                        </div>
+
+                        <!-- Hover overlay -->
+                        <div class="banner-overlay">
+                            <i class="bi bi-cloud-arrow-up-fill fs-2 text-white"></i>
+                            <span class="text-white fw-bold small mt-1">Alterar imagem</span>
+                        </div>
+                    </div>
+
+                    <!-- Hidden file input -->
+                    <div class="d-none">{{ form.photo }}</div>
+                </div>
+            </div>
+
+            <!-- Team Details -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>
+                        Informações da Equipe
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <!-- Nome -->
+                        <div class="col-md-7">
+                            <label for="id_name" class="form-label fw-bold">
+                                <i class="bi bi-people-fill me-1 text-primary"></i>
+                                Nome da Equipe <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            <div class="form-text">Escolha um nome memorável para sua equipe.</div>
+                        </div>
+
+                        <!-- Instituição -->
+                        <div class="col-md-5">
+                            <label for="id_institution" class="form-label fw-bold">
+                                <i class="bi bi-building me-1 text-secondary"></i>
+                                Instituição
+                            </label>
+                            {{ form.institution }}
+                            <div class="form-text">Vincule a uma instituição (opcional).</div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="col-12">
+                            <label for="id_description" class="form-label fw-bold">
+                                <i class="bi bi-card-text me-1 text-secondary"></i>
+                                Descrição
+                            </label>
+                            {{ form.description }}
+                            <div class="form-text">Descreva brevemente os objetivos e atividades da equipe.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: Actions & Tips -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4 sticky-top" style="top: 80px;">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-rocket-takeoff me-2"></i>
+                        Ações
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill mb-2">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Criar Equipe
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100 py-2 fw-bold rounded-pill">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancelar
+                    </a>
+
+                    <hr class="my-3">
+
+                    <!-- Tips -->
+                    <div class="tips-section">
+                        <h6 class="fw-bold small text-uppercase text-muted mb-3">
+                            <i class="bi bi-lightbulb me-1"></i> Dicas
+                        </h6>
+
+                        <div class="tip-item d-flex align-items-start mb-3">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-person-plus text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Convidar membros</small>
+                                <small class="text-muted">Após criar, use o código de convite para adicionar
+                                    membros.</small>
+                            </div>
+                        </div>
+
+                        <div class="tip-item d-flex align-items-start mb-3">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-image text-success"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Banner bonito</small>
+                                <small class="text-muted">Uma boa imagem facilita a identificação rápida da
+                                    equipe.</small>
+                            </div>
+                        </div>
+
+                        <div class="tip-item d-flex align-items-start">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-building text-warning"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Instituição</small>
+                                <small class="text-muted">Vincular a uma instituição ajuda a organizar equipes por
+                                    local.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    /* Banner Upload Area */
+    .team-banner-upload {
+        min-height: 200px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 8%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 8%, transparent));
+        border-bottom: 1px solid var(--border-color, #dee2e6);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .team-banner-upload:hover {
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 15%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 15%, transparent));
+    }
+
+    .team-banner-upload:hover .banner-overlay {
+        opacity: 1;
+    }
+
+    .banner-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .banner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    #banner-preview {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    /* Tip items */
+    .tip-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--card-bg, #ffffff) 90%, var(--bs-primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    /* Form field enhancements */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary) 25%, transparent);
+    }
+
+    .form-text {
+        font-size: 0.75rem;
+        color: var(--subtitle-color, #6c757d);
+    }
+</style>
+
+<script>
+    // Banner image preview
+    document.getElementById('id_photo').addEventListener('change', function (e) {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('banner-preview');
+                var placeholder = document.getElementById('banner-placeholder');
+
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                }
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+{% endblock %}

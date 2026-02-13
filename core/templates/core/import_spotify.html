@@ -1,0 +1,430 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Importar do Spotify{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Importar do Spotify</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold text-white mb-3">
+                <i class="bi bi-spotify text-success me-2"></i>Importar Playlist do Spotify
+            </h1>
+            <p class="text-muted">Cole a URL de uma playlist pública do Spotify para importar as músicas.</p>
+        </div>
+    </div>
+
+    <!-- URL Input Section -->
+    <div class="row mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">URL da Playlist</label>
+                        <input type="text" id="playlistUrl" class="form-control"
+                            placeholder="https://open.spotify.com/playlist/70djktJymzt5qMAjQLIdQ9" />
+                        <small class="text-muted">Exemplo: https://open.spotify.com/playlist/PLAYLIST_ID</small>
+                    </div>
+                    <button id="btnFetchPlaylist" class="btn btn-success">
+                        <i class="bi bi-search me-2"></i>Buscar Músicas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="row mb-4" style="display: none;">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border text-success mb-3" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="text-muted">Buscando músicas da playlist...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="row mb-4" style="display: none;">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Table Section -->
+    <div id="musicTableSection" class="row" style="display: none;">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Músicas Encontradas (<span id="trackCount">0</span>)</h5>
+                    <div>
+                        <button id="btnSelectAll" class="btn btn-sm btn-outline-light me-2">
+                            <i class="bi bi-check-all me-1"></i>Selecionar Todas
+                        </button>
+                        <button id="btnImportSelected" class="btn btn-sm btn-success">
+                            <i class="bi bi-download me-1"></i>Importar Selecionadas (<span id="selectedCount">0</span>)
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" id="checkboxSelectAll" class="form-check-input" />
+                                    </th>
+                                    <th>Título</th>
+                                    <th>Artista</th>
+                                    <th style="width: 100px;" class="text-center">Links</th>
+                                    <th style="width: 120px;">Tom</th>
+                                    <th style="width: 100px;">BPM</th>
+                                    <th style="width: 180px;">Categoria</th>
+                                    <th style="width: 180px;">Subcategoria</th>
+                                </tr>
+                            </thead>
+                            <tbody id="musicTableBody">
+                                <!-- Rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    let tracks = [];
+
+    // Event: Fetch Playlist
+    $('#btnFetchPlaylist').addEventListener('click', async () => {
+        const url = $('#playlistUrl').value.trim();
+        if (!url) {
+            showError('Por favor, insira uma URL de playlist.');
+            return;
+        }
+
+        showLoading();
+        hideError();
+        hideTable();
+
+        try {
+            const response = await fetch('{% url "fetch_spotify_playlist" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Erro ao buscar playlist.');
+            }
+
+            tracks = data.tracks;
+            renderTable(tracks);
+            showTable();
+            hideLoading();
+
+        } catch (error) {
+            hideLoading();
+            showError(error.message);
+        }
+    });
+
+    // Event: Select All Checkbox
+    $('#checkboxSelectAll').addEventListener('change', (e) => {
+        $$('.track-checkbox').forEach(cb => cb.checked = e.target.checked);
+        updateSelectedCount();
+    });
+
+    // Event: Select All Button
+    $('#btnSelectAll').addEventListener('click', () => {
+        const allChecked = Array.from($$('.track-checkbox')).every(cb => cb.checked);
+        $$('.track-checkbox').forEach(cb => cb.checked = !allChecked);
+        $('#checkboxSelectAll').checked = !allChecked;
+        updateSelectedCount();
+    });
+
+    // Event: Import Selected
+    $('#btnImportSelected').addEventListener('click', async () => {
+        const selectedTracks = [];
+        $$('.track-checkbox:checked').forEach((cb, idx) => {
+            const row = cb.closest('tr');
+            const trackIdx = parseInt(cb.dataset.index);
+            const track = tracks[trackIdx];
+
+            selectedTracks.push({
+                title: track.title,
+                artist: track.artist,
+                spotify_url: track.spotify_url,
+                youtube_url: row.querySelector('.input-youtube-url').value || null,
+                deezer_url: row.querySelector('.input-deezer-url').value || null,
+                cifra_url: row.querySelector('.input-cifra-url').value || null,
+                letras_url: row.querySelector('.input-letras-url').value || null,
+                key: row.querySelector('.input-key').value || null,
+                bpm: row.querySelector('.input-bpm').value || null,
+                category_id: row.querySelector('.select-category').value || null,
+                subcategory_id: row.querySelector('.select-subcategory').value || null
+            });
+        });
+
+        if (selectedTracks.length === 0) {
+            showError('Selecione pelo menos uma música para importar.');
+            return;
+        }
+
+        if (selectedTracks.length > 50) {
+            if (!confirm(`Você está prestes a importar ${selectedTracks.length} músicas. Continuar?`)) {
+                return;
+            }
+        }
+
+        $('#btnImportSelected').disabled = true;
+        $('#btnImportSelected').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Importando...';
+
+        try {
+            const response = await fetch('{% url "save_spotify_import" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ tracks: selectedTracks })
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao importar músicas.');
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+
+                    let errorMsg = 'Erro desconhecido do servidor.';
+                    if (text.includes('<!DOCTYPE html>')) {
+                        const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+                        const pageTitle = titleMatch ? titleMatch[1] : 'Página desconhecida';
+
+                        if (pageTitle === 'Página desconhecida') {
+                            errorMsg = `Erro: Resposta HTML sem título. Conteúdo snippet:\n${text.substring(0, 200)}`;
+                        } else {
+                            errorMsg = `Erro: Servidor retornou HTML (${pageTitle}). Verifique o console.`;
+                        }
+
+                        if (pageTitle.toLowerCase().includes('login') || pageTitle.toLowerCase().includes('entrar')) {
+                            errorMsg = 'Sessão expirada. Por favor, faça login novamente.';
+                        }
+                    }
+                    throw new Error(errorMsg);
+                }
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (data.imported === 0 && data.errors && data.errors.length > 0) {
+                // Show errors if nothing was imported
+                let errorMsg = 'Falha ao importar músicas:';
+                // Show max 5 errors
+                data.errors.slice(0, 5).forEach(err => errorMsg += `\n- ${err}`);
+                if (data.errors.length > 5) errorMsg += `\n... e mais ${data.errors.length - 5} erros.`;
+                alert(errorMsg);
+            } else {
+                let msg = `✅ ${data.imported} música(s) importada(s) com sucesso!`;
+                if (data.updated > 0) msg += `\n🔄 ${data.updated} música(s) atualizada(s).`;
+                if (data.skipped > 0) msg += `\n⚠️ ${data.skipped} música(s) já existiam sem alterações.`;
+                if (data.errors && data.errors.length > 0) msg += `\n❌ ${data.errors.length} falharam.`;
+                alert(msg);
+
+                if (data.imported > 0 || data.updated > 0) {
+                    window.location.href = '{% url "repertorio" %}';
+                }
+            }
+
+        } catch (error) {
+            showError(error.message);
+            $('#btnImportSelected').disabled = false;
+            $('#btnImportSelected').innerHTML = '<i class="bi bi-download me-1"></i>Importar Selecionadas';
+        }
+    });
+
+    function renderTable(tracks) {
+        const tbody = $('#musicTableBody');
+        tbody.innerHTML = '';
+
+        tracks.forEach((track, idx) => {
+            const row = document.createElement('tr');
+            row.id = `track-row-${idx}`;
+            row.innerHTML = `
+                <td class="text-center align-middle">
+                    <input type="checkbox" class="form-check-input track-checkbox" data-index="${idx}" checked />
+                </td>
+                <td class="align-middle">
+                    <div class="fw-bold text-truncate" style="max-width: 200px;" title="${track.title}">${track.title}</div>
+                    <input type="hidden" class="input-spotify-url" value="${track.spotify_url || ''}">
+                    <input type="hidden" class="input-youtube-url">
+                    <input type="hidden" class="input-deezer-url">
+                    <input type="hidden" class="input-cifra-url">
+                    <input type="hidden" class="input-letras-url">
+                </td>
+                <td class="align-middle text-truncate" style="max-width: 150px;" title="${track.artist}">${track.artist}</td>
+                <td class="text-center align-middle">
+                    <div class="d-flex justify-content-center gap-1">
+                        <i class="bi bi-youtube text-secondary service-icon icon-youtube" title="YouTube"></i>
+                        <i class="bi bi-music-note-beamed text-secondary service-icon icon-deezer" title="Deezer"></i>
+                        <i class="bi bi-music-player text-warning service-icon icon-cifra" title="Cifra Club"></i>
+                        <i class="bi bi-file-text text-info service-icon icon-letras" title="Letras"></i>
+                    </div>
+                </td>
+                <td class="align-middle">
+                    <input type="text" class="form-control form-control-sm input-key text-center" placeholder="Ex: C#" maxlength="5" />
+                </td>
+                <td class="align-middle">
+                    <input type="number" class="form-control form-control-sm input-bpm text-center" placeholder="120" min="40" max="300" />
+                </td>
+                <td class="align-middle">
+                    <select class="form-select form-select-sm select-category">
+                        <option value="">Nenhuma</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td class="align-middle">
+                    <select class="form-select form-select-sm select-subcategory">
+                        <option value="">Nenhuma</option>
+                        {% for sub in subcategories %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(row);
+
+            // Add event listener for checkbox
+            row.querySelector('.track-checkbox').addEventListener('change', updateSelectedCount);
+        });
+
+        $('#trackCount').textContent = tracks.length;
+        updateSelectedCount();
+
+        // Start metadata fetching
+        fetchMetadataForTracks(tracks);
+    }
+
+    async function fetchMetadataForTracks(tracks) {
+        for (let i = 0; i < tracks.length; i++) {
+            const track = tracks[i];
+            const row = document.getElementById(`track-row-${i}`);
+            if (!row) continue;
+
+            try {
+                // Determine icons
+                const iconYoutube = row.querySelector('.icon-youtube');
+                const iconDeezer = row.querySelector('.icon-deezer');
+                const iconCifra = row.querySelector('.icon-cifra');
+                const iconLetras = row.querySelector('.icon-letras');
+
+                // Reset icons to secondary
+                iconYoutube.className = 'bi bi-youtube text-secondary service-icon icon-youtube';
+                iconDeezer.className = 'bi bi-music-note-beamed text-secondary service-icon icon-deezer';
+                iconCifra.className = 'bi bi-music-player text-secondary service-icon icon-cifra';
+                iconLetras.className = 'bi bi-file-text text-secondary service-icon icon-letras';
+
+                const query = `${track.title} ${track.artist}`;
+                const encodedQuery = encodeURIComponent(query);
+                const response = await fetch(`{% url 'music_search_api' %}?q=${encodedQuery}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Update icons and hidden inputs
+                    if (data.youtube) {
+                        iconYoutube.className = 'bi bi-youtube text-danger service-icon icon-youtube';
+                        row.querySelector('.input-youtube-url').value = data.youtube;
+                    }
+                    if (data.deezer) {
+                        iconDeezer.className = 'bi bi-music-note-beamed text-primary service-icon icon-deezer';
+                        row.querySelector('.input-deezer-url').value = data.deezer;
+                    }
+                    if (data.cifra) {
+                        iconCifra.className = 'bi bi-music-player text-warning service-icon icon-cifra';
+                        row.querySelector('.input-cifra-url').value = data.cifra;
+                    }
+                    if (data.letras) {
+                        iconLetras.className = 'bi bi-file-text text-info service-icon icon-letras';
+                        row.querySelector('.input-letras-url').value = data.letras;
+                    }
+
+                    // Update BPM/Key if empty and available
+                    if (data.bpm && !row.querySelector('.input-bpm').value) {
+                        row.querySelector('.input-bpm').value = data.bpm;
+                    }
+                    if (data.key && !row.querySelector('.input-key').value) {
+                        row.querySelector('.input-key').value = data.key;
+                    }
+                }
+            } catch (e) {
+                console.error(`Erro buscando metadata para ${track.title}`, e);
+            }
+
+            // Small delay to be nice to APIs
+            await new Promise(r => setTimeout(r, 500));
+        }
+    }
+
+    function updateSelectedCount() {
+        const count = $$('.track-checkbox:checked').length;
+        $('#selectedCount').textContent = count;
+        $('#btnImportSelected').disabled = count === 0;
+    }
+
+    function showLoading() {
+        $('#loadingState').style.display = 'block';
+    }
+
+    function hideLoading() {
+        $('#loadingState').style.display = 'none';
+    }
+
+    function showError(message) {
+        $('#errorMessage').textContent = message;
+        $('#errorState').style.display = 'block';
+    }
+
+    function hideError() {
+        $('#errorState').style.display = 'none';
+    }
+
+    function showTable() {
+        $('#musicTableSection').style.display = 'block';
+    }
+
+    function hideTable() {
+        $('#musicTableSection').style.display = 'none';
+    }
+</script>
+{% endblock %}

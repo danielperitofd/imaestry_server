@@ -1,0 +1,545 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Adicionar Música | Busca{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                    <i class="bi bi-music-note-beamed me-1"></i> Música
+                </span>
+                <div>
+                    <h4 class="fw-bold mb-0">Adicionar Música</h4>
+                    <p class="text-muted small mb-0">Localize metadados e links oficiais de músicas.</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal"
+                    data-bs-target="#helpModal">
+                    <i class="bi bi-info-circle"></i> Ajuda
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Box -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+        <div>
+            <h5 class="fw-bold mb-1">Buscar música</h5>
+            <p class="text-muted mb-0 small">Digite título e, se quiser, o artista. Dica: pressione <kbd>Enter</kbd>.
+            </p>
+        </div>
+        <div class="text-muted small">
+            <i class="bi bi-shield-check me-1"></i> Somente links públicos e metadados
+        </div>
+    </div>
+
+    <form id="searchForm">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-5">
+                <label class="form-label fw-bold">Título</label>
+                <input id="qTitle" class="form-control form-control-lg" placeholder="Tua forte mão" autocomplete="off"
+                    required>
+            </div>
+            <div class="col-12 col-lg-4">
+                <label class="form-label fw-bold">Artista (opcional)</label>
+                <input id="qArtist" class="form-control form-control-lg" placeholder="Paulo Cesar Baruk"
+                    autocomplete="off">
+            </div>
+            <div class="col-12 col-lg-3 d-grid">
+                <button id="btnSearch" class="btn btn-primary btn-lg" type="submit">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="spin"></span>
+                    <i class="bi bi-search me-2"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex flex-wrap gap-3 align-items-center">
+            <div class="text-muted small me-2">Serviços:</div>
+
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="svcSpotify" checked>
+                <label class="form-check-label" for="svcSpotify"><i
+                        class="bi bi-spotify me-1 text-success"></i>Spotify</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="svcDeezer" checked>
+                <label class="form-check-label" for="svcDeezer"><i class="bi bi-music-note-list me-1"></i>Deezer</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="svcYouTube" checked>
+                <label class="form-check-label" for="svcYouTube"><i
+                        class="bi bi-youtube me-1 text-danger"></i>YouTube</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="svcCifra" checked>
+                <label class="form-check-label" for="svcCifra"><i class="bi bi-music-note me-1"></i>Cifras</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="svcLetras" checked>
+                <label class="form-check-label" for="svcLetras"><i class="bi bi-type me-1"></i>Letras</label>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Results Section -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h6 class="fw-bold mb-0">Resultados</h6>
+    <div class="d-flex align-items-center gap-2">
+        <select id="sortBy" class="form-select form-select-sm" style="width: 220px;">
+            <option value="best">Ordenar: melhor match</option>
+            <option value="title">Ordenar: título (A-Z)</option>
+            <option value="artist">Ordenar: artista (A-Z)</option>
+        </select>
+        <button id="btnClear" class="btn btn-outline-secondary btn-sm" type="button">
+            <i class="bi bi-x-circle"></i> Limpar
+        </button>
+    </div>
+</div>
+
+<div id="emptyState" class="card border-0 bg-light rounded-4">
+    <div class="card-body text-center py-5">
+        <div class="display-6 mb-2 text-muted"><i class="bi bi-search"></i></div>
+        <div class="fw-semibold">Nenhuma busca ainda</div>
+        <div class="text-muted small">Pesquise um título para ver os matches por serviço e os links.</div>
+    </div>
+</div>
+
+<div id="resultsWrap" class="row g-3 d-none"></div>
+
+<!-- Selection Panel -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+            <h6 class="fw-bold mb-1">Selecionado para adicionar</h6>
+            <div class="text-muted small">Quando você confirmar, isso vira um registro no seu sistema.</div>
+        </div>
+        <button id="btnConfirm" class="btn btn-success" type="button" disabled>
+            <i class="bi bi-check2-circle me-1"></i> Confirmar Adição
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <label class="form-label fw-bold">Título</label>
+            <input id="selTitle" class="form-control" placeholder="..." readonly>
+        </div>
+        <div class="col-12 col-lg-3">
+            <label class="form-label fw-bold">Artista</label>
+            <input id="selArtist" class="form-control" placeholder="..." readonly>
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label fw-bold">Tom (original)</label>
+            <input id="selKey" class="form-control" placeholder="Ex: Em / C#m">
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label fw-bold">BPM</label>
+            <input id="selBpm" class="form-control" type="number" placeholder="Ex: 120">
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label fw-bold">Categoria</label>
+            <select id="selCategory" class="form-select">
+                <option value="">Nenhuma</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label fw-bold">Subcategoria</label>
+            <select id="selSubcategory" class="form-select">
+                <option value="">Nenhuma</option>
+                {% for sub in subcategories %}
+                <option value="{{ sub.id }}">{{ sub.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12">
+            <label class="form-label fw-bold">Links por serviço</label>
+            <div id="selLinks" class="d-flex flex-wrap gap-2">
+                <span class="text-muted small">Selecione um resultado acima para ver os links.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-warning mt-3 mb-0 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Nota: "Tom original" e "BPM" podem vir vazios dependendo da fonte. Você pode preencher manualmente se
+        necessário.
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Como essa tela funciona</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="mb-0">
+                    <li>Você busca por título/artista.</li>
+                    <li>O sistema consulta serviços habilitados (Spotify, Deezer, YouTube, etc).</li>
+                    <li>Para cada resultado, você vê "match" por serviço (ícone aceso com link).</li>
+                    <li>Você escolhe um resultado e confirma a adição (salvando metadados + links).</li>
+                    <li>Músicas são únicas: se já existe no repertório (via Letras.mus.br), não será duplicada.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .service-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .35rem .6rem;
+        border-radius: 999px;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+        text-decoration: none;
+        user-select: none;
+        font-size: 0.875rem;
+    }
+
+    .service-pill.disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .service-dot {
+        width: .65rem;
+        height: .65rem;
+        border-radius: 50%;
+        background: var(--bs-secondary);
+    }
+
+    .service-dot.on {
+        background: var(--bs-success);
+    }
+
+    .result-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .result-card {
+        transition: transform .15s ease;
+        cursor: pointer;
+    }
+
+    kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: .85em;
+        padding: .15rem .35rem;
+        border: 1px solid var(--bs-border-color);
+        border-bottom-width: 2px;
+        border-radius: .35rem;
+        background: var(--bs-tertiary-bg);
+    }
+</style>
+
+<script>
+    const $ = (sel) => document.querySelector(sel);
+
+    const icons = {
+        spotify: `<i class="bi bi-spotify text-success"></i>`,
+        deezer: `<i class="bi bi-music-note-list"></i>`,
+        youtube: `<i class="bi bi-youtube text-danger"></i>`,
+        cifra: `<i class="bi bi-music-note"></i>`,
+        letras: `<i class="bi bi-type"></i>`,
+    };
+
+    const labels = {
+        spotify: "Spotify",
+        deezer: "Deezer",
+        youtube: "YouTube",
+        cifra: "Cifras",
+        letras: "Letras",
+    };
+
+    let currentResults = [];
+    let selectedResult = null;
+
+    function svcEnabled() {
+        return {
+            spotify: $("#svcSpotify").checked,
+            deezer: $("#svcDeezer").checked,
+            youtube: $("#svcYouTube").checked,
+            cifra: $("#svcCifra").checked,
+            letras: $("#svcLetras").checked,
+        };
+    }
+
+    function renderServicePills(links) {
+        const enabled = svcEnabled();
+        const pills = [];
+        const services = ['spotify', 'deezer', 'youtube', 'cifra', 'letras'];
+
+        for (const svc of services) {
+            if (!enabled[svc]) continue;
+
+            const url = links[svc];
+            const on = !!url;
+
+            pills.push(`
+                <a class="service-pill ${on ? '' : 'disabled'}"
+                   href="${on ? url : '#'}"
+                   target="_blank" rel="noopener"
+                   title="${on ? 'Abrir no ' + labels[svc] : 'Sem match no ' + labels[svc]}">
+                    <span class="service-dot ${on ? 'on' : ''}"></span>
+                    ${icons[svc]}
+                    <span>${labels[svc]}</span>
+                    ${on ? `<i class="bi bi-box-arrow-up-right ms-1"></i>` : ''}
+                </a>
+            `);
+        }
+
+        return pills.join('');
+    }
+
+    function scoreMatch(result) {
+        const enabled = svcEnabled();
+        let score = 0;
+        if (enabled.spotify && result.spotify) score++;
+        if (enabled.deezer && result.deezer) score++;
+        if (enabled.youtube && result.youtube) score++;
+        if (enabled.cifra && result.cifra) score++;
+        if (enabled.letras && result.letras) score++;
+        return score;
+    }
+
+    function renderResults(list) {
+        const wrap = $("#resultsWrap");
+        wrap.innerHTML = "";
+
+        if (!list.length) {
+            wrap.classList.add("d-none");
+            $("#emptyState").classList.remove("d-none");
+            $("#emptyState").querySelector(".fw-semibold").textContent = "Nada encontrado";
+            $("#emptyState").querySelector(".text-muted").textContent = "Tente outro título ou artista.";
+            return;
+        }
+
+        $("#emptyState").classList.add("d-none");
+        wrap.classList.remove("d-none");
+
+        for (let i = 0; i < list.length; i++) {
+            const r = list[i];
+            const score = scoreMatch(r);
+            const links = {
+                spotify: r.spotify,
+                deezer: r.deezer,
+                youtube: r.youtube,
+                cifra: r.cifra,
+                letras: r.letras
+            };
+
+            wrap.innerHTML += `
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 result-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div>
+                                    <div class="fw-bold fs-5">${r.title || 'Título'}</div>
+                                    <div class="text-muted">${r.artist || 'Artista'}</div>
+                                </div>
+                                <span class="badge text-bg-primary rounded-pill">match: ${score}</span>
+                            </div>
+
+                            <div class="mt-3 d-flex flex-wrap gap-2">
+                                ${renderServicePills(links)}
+                            </div>
+
+                            <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="text-muted small">
+                                    <i class="bi bi-music-note-beamed me-1"></i>
+                                    Tom: <span class="${r.key ? 'fw-semibold text-body' : 'text-muted'}">${r.key || 'indisponível'}</span>
+                                    ${r.bpm ? ` | BPM: <span class="fw-semibold text-body">${r.bpm}</span>` : ''}
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-pick="${i}">
+                                    <i class="bi bi-plus-circle me-1"></i> Selecionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Bind pick buttons
+        wrap.querySelectorAll("[data-pick]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.getAttribute("data-pick"));
+                selectResult(list[idx]);
+            });
+        });
+    }
+
+    function selectResult(r) {
+        selectedResult = r;
+        $("#selTitle").value = r.title || '';
+        $("#selArtist").value = r.artist || '';
+        $("#selKey").value = r.key || '';
+        $("#selBpm").value = r.bpm || '';
+
+        const links = {
+            spotify: r.spotify,
+            deezer: r.deezer,
+            youtube: r.youtube,
+            cifra: r.cifra,
+            letras: r.letras
+        };
+        $("#selLinks").innerHTML = renderServicePills(links);
+        $("#btnConfirm").disabled = false;
+    }
+
+    // Search form submit
+    $("#searchForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const title = $("#qTitle").value.trim();
+        const artist = $("#qArtist").value.trim();
+
+        if (!title) return;
+
+        const enabled = svcEnabled();
+        const anyEnabled = Object.values(enabled).some(v => v);
+        if (!anyEnabled) {
+            alert("Habilite pelo menos um serviço para buscar.");
+            return;
+        }
+
+        $("#spin").classList.remove("d-none");
+        $("#btnSearch").disabled = true;
+
+        try {
+            const query = artist ? `${title} ${artist}` : title;
+            const response = await fetch(`/api/music-search/?q=${encodeURIComponent(query)}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`);
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                currentResults = [];
+            } else {
+                // Transform API response into result format
+                currentResults = [{
+                    title: title,
+                    artist: artist || data.artist || '',
+                    key: data.key || '',
+                    bpm: data.bpm || '',
+                    spotify: data.spotify,
+                    deezer: data.deezer,
+                    youtube: data.youtube,
+                    cifra: data.cifra,
+                    letras: data.letras,
+                    exists: data.exists
+                }];
+
+                if (data.exists) {
+                    alert("Esta música já existe no seu repertório!");
+                }
+            }
+
+            renderResults(currentResults);
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao buscar música. Tente novamente.");
+        } finally {
+            $("#spin").classList.add("d-none");
+            $("#btnSearch").disabled = false;
+        }
+    });
+
+    // Sort change
+    $("#sortBy").addEventListener("change", () => {
+        const mode = $("#sortBy").value;
+        let sorted = [...currentResults];
+
+        if (mode === "title") {
+            sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        } else if (mode === "artist") {
+            sorted.sort((a, b) => (a.artist || '').localeCompare(b.artist || ''));
+        } else {
+            sorted.sort((a, b) => scoreMatch(b) - scoreMatch(a));
+        }
+
+        renderResults(sorted);
+    });
+
+    // Clear button
+    $("#btnClear").addEventListener("click", () => {
+        $("#qTitle").value = "";
+        $("#qArtist").value = "";
+        $("#selTitle").value = "";
+        $("#selArtist").value = "";
+        $("#selKey").value = "";
+        $("#selBpm").value = "";
+        $("#selLinks").innerHTML = `<span class="text-muted small">Selecione um resultado acima para ver os links.</span>`;
+        $("#btnConfirm").disabled = true;
+
+        currentResults = [];
+        selectedResult = null;
+
+        $("#resultsWrap").classList.add("d-none");
+        $("#emptyState").classList.remove("d-none");
+        $("#emptyState").querySelector(".fw-semibold").textContent = "Nenhuma busca ainda";
+        $("#emptyState").querySelector(".text-muted").textContent = "Pesquise um título para ver os matches por serviço e os links.";
+    });
+
+    // Confirm button
+    $("#btnConfirm").addEventListener("click", async () => {
+        if (!selectedResult) return;
+
+        const payload = {
+            title: $("#selTitle").value,
+            artist: $("#selArtist").value,
+            key: $("#selKey").value,
+            bpm: $("#selBpm").value,
+            category_id: $("#selCategory").value || null,
+            subcategory_id: $("#selSubcategory").value || null,
+            spotify_url: selectedResult.spotify || '',
+            deezer_url: selectedResult.deezer || '',
+            youtube_url: selectedResult.youtube || '',
+            cifra_url: selectedResult.cifra || '',
+            letras_url: selectedResult.letras || ''
+        };
+
+        try {
+            const response = await fetch('/musicas/salvar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Música adicionada com sucesso!");
+                $("#btnClear").click();
+            } else {
+                alert(data.error || "Erro ao salvar música.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao salvar música. Tente novamente.");
+        }
+    });
+</script>
+{% endblock %}

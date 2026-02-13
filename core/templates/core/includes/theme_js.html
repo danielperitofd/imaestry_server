@@ -1,0 +1,21 @@
+<script>
+    (function () {
+        const r = document.documentElement;
+        // Custom (layout)
+        r.style.setProperty('--sidebar-bg', '{{ theme.sidebar_bg }}');
+
+        // Bootstrap Variable Overrides
+        r.style.setProperty('--bs-primary', '{{ theme.primary_color }}');
+        r.style.setProperty('--bs-primary-rgb', '{{ theme_rgb.primary }}');
+        r.style.setProperty('--bs-secondary', '{{ theme.secondary_color }}');
+        r.style.setProperty('--bs-secondary-rgb', '{{ theme_rgb.secondary }}');
+        r.style.setProperty('--bs-success', '{{ theme.success_color }}');
+        r.style.setProperty('--bs-success-rgb', '{{ theme_rgb.success }}');
+        r.style.setProperty('--bs-warning', '{{ theme.warning_color }}');
+        r.style.setProperty('--bs-warning-rgb', '{{ theme_rgb.warning }}');
+        r.style.setProperty('--bs-danger', '{{ theme.error_color }}');
+        r.style.setProperty('--bs-danger-rgb', '{{ theme_rgb.error }}');
+        r.style.setProperty('--bs-body-bg', '{{ theme.main_bg }}');
+        r.style.setProperty('--bs-gradient', 'linear-gradient(135deg, {{ theme.gradient_start }} 0%, {{ theme.gradient_end }} 100%)');
+    })();
+</script>

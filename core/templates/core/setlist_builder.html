@@ -1,0 +1,1129 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Criar Set List | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="setlist-builder-banner p-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Criar Set List</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-music-note-list me-2"></i>Criar Set List
+                </h2>
+                <p class="mb-0 opacity-75 small">Monte Momentos, selecione músicas do repertório e gere uma prévia.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-light border rounded-pill px-3 fw-bold" id="btnNew">
+                    <i class="bi bi-plus-circle me-1"></i> Novo
+                </button>
+                <button class="btn btn-primary rounded-pill px-3 fw-bold" id="btnSave">
+                    <i class="bi bi-check2-circle me-1"></i> Salvar
+                </button>
+                <button class="btn btn-outline-dark rounded-pill px-3 fw-bold" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasList">
+                    <i class="bi bi-card-list me-1"></i> Minhas Setlists
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Builder Column -->
+    <div class="col-12 col-lg-7">
+        <!-- Configuration Card -->
+        <div class="card card-neo rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0 d-flex align-items-center justify-content-between bg-header-soft">
+                <h5 class="fw-bold mb-0 section-title d-flex align-items-center gap-2">
+                    <span class="badge-soft"><i class="bi bi-gear-fill me-1"></i> Configuração</span>
+                </h5>
+                <span class="text-muted small">Defina metadados e datas do evento</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-bold small">Equipe</label>
+                        <select class="form-select rounded-3" id="teamSelect">
+                            {% for team in user_teams %}
+                            <option value="{{ team.id }}">{{ team.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label fw-bold small">Nº da Setlist</label>
+                        <input type="number" class="form-control rounded-3" id="setNumber" placeholder="57" value="57">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-bold small">Dia da Semana</label>
+                        <select class="form-select rounded-3" id="weekDay">
+                            <option>Dom</option>
+                            <option>Sáb</option>
+                            <option>Sex</option>
+                            <option>Qui</option>
+                            <option>Qua</option>
+                            <option>Ter</option>
+                            <option>Seg</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label fw-bold small">Mês</label>
+                        <select class="form-select rounded-3" id="monthName">
+                            <option value="Janeiro">Janeiro</option>
+                            <option value="Fevereiro" selected>Fevereiro</option>
+                            <option value="Março">Março</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Maio">Maio</option>
+                            <option value="Junho">Junho</option>
+                            <option value="Julho">Julho</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Setembro">Setembro</option>
+                            <option value="Outubro">Outubro</option>
+                            <option value="Novembro">Novembro</option>
+                            <option value="Dezembro">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold small d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-calendar3"></i> Dias (Ensaio/Evento)
+                        </label>
+                        <div class="input-group mb-2" style="max-width: 420px;">
+                            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                            <input type="text" class="form-control rounded-end-3" id="daysPicker" placeholder="Selecione uma ou mais datas">
+                        </div>
+                        <div class="text-muted small input-hint mb-2">Selecione as datas no calendário e etiquete cada uma (Ex.: Ensaio, Culto).</div>
+                        <div id="daysList" class="days-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teams Card -->
+        <div class="card card-neo rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0 d-flex align-items-center justify-content-between bg-header-soft">
+                <h5 class="fw-bold mb-0 section-title d-flex align-items-center gap-2">
+                    <span class="badge-soft-success"><i class="bi bi-people-fill me-1"></i> Equipes</span>
+                </h5>
+                <span class="text-muted small">Sugestões com base nas habilidades</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-12 col-xl-6">
+                        <label class="form-label fw-bold small">
+                            <i class="bi bi-music-player me-1"></i>Equipe Instrumental <span
+                                class="text-muted fw-normal">(um por linha)</span>
+                        </label>
+                        <textarea class="form-control rounded-3" rows="5" id="instrumentalTeam"
+                            placeholder="Bateria: Nome&#10;Baixo: Nome"></textarea>
+                        <div id="instrumentalSuggestions" class="mt-2 d-flex flex-wrap gap-1"></div>
+                    </div>
+                    <div class="col-12 col-xl-6">
+                        <label class="form-label fw-bold small">
+                            <i class="bi bi-mic me-1"></i>Vocal <span class="text-muted fw-normal">(vírgula ou
+                                linha)</span>
+                        </label>
+                        <textarea class="form-control rounded-3" rows="5" id="vocalTeam"
+                            placeholder="Nome1, Nome2, Nome3"></textarea>
+                        <div id="vocalSuggestions" class="mt-2 d-flex flex-wrap gap-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Moments Card -->
+        <div class="card card-neo rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center bg-header-soft">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-lightning-fill me-2 text-warning"></i>Momentos
+                </h5>
+                <button class="btn btn-sm btn-primary rounded-pill px-3" id="btnAddMoment">
+                    <i class="bi bi-plus-lg me-1"></i> Adicionar Momento
+                </button>
+            </div>
+            <div class="card-body p-4" id="momentsContainer">
+                <!-- Dynamic moments rendered here -->
+            </div>
+        </div>
+
+        <!-- Santa Ceia Toggle -->
+        <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="hasSantaCeia"
+                            style="width: 3em; height: 1.5em;">
+                        <label class="form-check-label fw-bold ms-2" for="hasSantaCeia">
+                            <i class="bi bi-cup-hot me-1"></i>
+                            Santa Ceia neste final de semana
+                        </label>
+                        <div class="text-muted small">Adiciona 2 cânticos após a pregação</div>
+                    </div>
+                    <button class="btn btn-outline-primary rounded-pill px-3" id="btnAutoAddCeia">
+                        <i class="bi bi-magic me-1"></i> Sugerir Pós-Pregação
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Column -->
+    <div class="col-12 col-lg-5">
+        <div class="sticky-preview">
+            <!-- Preview Card -->
+            <div class="card card-neo rounded-4 overflow-hidden mb-3">
+                <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center bg-header-soft">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-eye-fill me-2 text-info"></i>Prévia
+                    </h5>
+                    <button class="btn btn-sm btn-outline-dark rounded-pill px-3" id="btnCopy">
+                        <i class="bi bi-clipboard me-1"></i> Copiar
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert border rounded-4 small mb-3 d-flex align-items-center gap-2"
+                        style="background: color-mix(in srgb, var(--bs-info, #0dcaf0) 8%, transparent);">
+                        <i class="bi bi-info-circle text-info"></i>
+                        Formato pronto para colar no WhatsApp ou imprimir.
+                    </div>
+                    <div class="preview-box p-3 rounded-4" id="previewBox"
+                        style="background: color-mix(in srgb, var(--card-bg, #f8f9fa) 95%, var(--bs-secondary, #6c757d)); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.82rem; white-space: pre-wrap; line-height: 1.5; max-height: 500px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-danger rounded-pill w-100" id="btnDeleteCurrent" disabled>
+                    <i class="bi bi-trash3 me-1"></i> Excluir
+                </button>
+                <button class="btn btn-outline-primary rounded-pill w-100" id="btnExportJson">
+                    <i class="bi bi-download me-1"></i> Exportar JSON
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offcanvas: Minhas Setlists (CRUD) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasList">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold">
+            <i class="bi bi-card-list me-2"></i>Minhas Setlists
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" id="searchSetlists" placeholder="Buscar por número, mês...">
+        </div>
+        <div id="setlistsList" class="d-grid gap-2"></div>
+        <div class="text-muted small mt-3 p-3 rounded-3"
+            style="background: color-mix(in srgb, var(--bs-warning) 8%, transparent);">
+            <i class="bi bi-info-circle me-1"></i>
+            Mockup: dados armazenados no navegador (localStorage). No futuro, serão salvos no banco.
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Repertório -->
+<div class="modal fade" id="repertoireModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-music-note-beamed me-2 text-primary"></i>Repertório
+                    </h5>
+                    <div class="text-muted small">Selecione uma música para adicionar ao momento.</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="repSearch"
+                        placeholder="Buscar por título, artista ou tom...">
+                </div>
+                <div id="repertoireList" class="list-group list-group-flush"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light border rounded-pill px-4"
+                    data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="appToast" class="toast align-items-center text-bg-dark border-0 rounded-pill" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg">Ok.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Neo card and header accents */
+    .card-neo{
+        border: 1px solid var(--border-color, #e9ecef);
+        box-shadow: 0 8px 24px rgba(16, 24, 40, .06);
+        background: var(--card-bg, #fff);
+    }
+    .bg-header-soft{ background: color-mix(in srgb, var(--bs-primary) 4%, transparent); }
+    .section-title{ letter-spacing: .3px; }
+    .badge-soft{
+        display:inline-flex; align-items:center; gap:.25rem;
+        background: color-mix(in srgb, var(--bs-primary) 12%, transparent);
+        color: var(--bs-primary); border: 1px solid color-mix(in srgb, var(--bs-primary) 22%, transparent);
+        padding: .25rem .6rem; border-radius: 999px; font-weight: 600; font-size:.8rem;
+    }
+    .badge-soft-success{
+        display:inline-flex; align-items:center; gap:.25rem;
+        background: color-mix(in srgb, var(--bs-success) 12%, transparent);
+        color: var(--bs-success); border: 1px solid color-mix(in srgb, var(--bs-success) 22%, transparent);
+        padding: .25rem .6rem; border-radius: 999px; font-weight: 600; font-size:.8rem;
+    }
+    .input-hint{ opacity: .85; }
+    .setlist-builder-banner {
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 10%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 10%, transparent));
+    }
+
+    .sticky-preview {
+        position: sticky;
+        top: 1rem;
+    }
+
+    /* Moment cards */
+    .moment-card {
+        border: 1px solid var(--border-color, #e9ecef);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+    .moment-card.active-moment {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--bs-primary) 20%, transparent);
+    }
+
+    .moment-header {
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .moment-items {
+        padding: 0.75rem 1rem 1rem;
+    }
+
+    /* Setlist item */
+    .setlist-item {
+        border: 1px solid var(--border-color, #e9ecef);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        background: var(--card-bg, #fff);
+    }
+
+    .setlist-item:hover {
+        background: color-mix(in srgb, var(--bs-primary) 4%, transparent);
+    }
+
+    .setlist-item.item-offertory {
+        background: color-mix(in srgb, var(--bs-warning) 8%, transparent);
+        border-color: color-mix(in srgb, var(--bs-warning) 25%, transparent);
+    }
+
+    .setlist-item.item-message {
+        background: color-mix(in srgb, var(--bs-info) 8%, transparent);
+        border-color: color-mix(in srgb, var(--bs-info) 25%, transparent);
+    }
+
+    /* Repertoire list in modal */
+    .rep-item {
+        cursor: pointer;
+        transition: all 0.15s;
+        border-radius: 0.75rem !important;
+        margin-bottom: 0.25rem;
+    }
+
+    .rep-item:hover {
+        background: color-mix(in srgb, var(--bs-primary) 6%, transparent);
+    }
+
+    /* Saved setlist items in offcanvas */
+    .saved-setlist-item {
+        border: 1px solid var(--border-color, #e9ecef);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .saved-setlist-item:hover {
+        background: color-mix(in srgb, var(--bs-primary) 6%, transparent);
+        border-color: var(--bs-primary);
+    }
+
+    /* Days chips */
+    .days-grid{ display:flex; flex-wrap: wrap; gap:.5rem; }
+    .day-chip{ display:flex; align-items:center; gap:.5rem; padding:.4rem .6rem; border:1px solid var(--border-color,#e9ecef); border-radius:999px; background: color-mix(in srgb, var(--bs-primary) 6%, transparent); }
+    .day-chip select{ border:none; background: transparent; padding:.1rem .25rem; }
+    .day-chip .remove{ border:1px solid color-mix(in srgb, var(--bs-danger) 30%, transparent); }
+
+    @media (max-width: 991px) {
+        .sticky-preview {
+            position: static;
+        }
+    }
+</style>
+
+<!-- Flatpickr (multi-date picker) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+<!-- Repertório JSON seguro -->
+{{ repertoire_data|json_script:"repertoire-json" }}
+
+<script>
+    // ============================================================
+    //  REPERTÓRIO DO BANCO (injetado pelo Django)
+    // ============================================================
+    const REPERTOIRE = JSON.parse(document.getElementById("repertoire-json").textContent);
+
+    // ============================================================
+    //  MEMBROS DO TIME (dinâmico)
+    // ============================================================
+    let teamMembers = [];
+
+    async function fetchTeamMembers(teamId) {
+        if (!teamId) return;
+        try {
+            const resp = await fetch(`/setlist/api/team-members/${teamId}/`);
+            const data = await resp.json();
+            teamMembers = data.members || [];
+            renderMemberSuggestions();
+        } catch (e) {
+            console.error("Erro ao buscar membros:", e);
+        }
+    }
+
+    function renderMemberSuggestions() {
+        const instWrap = document.getElementById("instrumentalSuggestions");
+        const vocalWrap = document.getElementById("vocalSuggestions");
+        instWrap.innerHTML = "";
+        vocalWrap.innerHTML = "";
+
+        const isVocalSkill = (s) => (s || '').toLowerCase().includes('vocal') || (s || '').toLowerCase().includes('voz') || (s || '').toLowerCase().includes('cantor');
+
+        teamMembers.forEach(m => {
+            const skills = Array.isArray(m.skills) ? m.skills : [];
+            const hasVocal = skills.some(isVocalSkill);
+
+            // Vocal suggestion: one pill per member (adds the name to vocal list)
+            if (hasVocal) {
+                const vbtn = document.createElement('button');
+                vbtn.type = 'button';
+                vbtn.className = 'btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small';
+                vbtn.style.fontSize = '0.7rem';
+                vbtn.textContent = m.name;
+                vbtn.title = skills.join(', ');
+                vbtn.addEventListener('click', () => {
+                    const area = document.getElementById('vocalTeam');
+                    const current = area.value.trim();
+                    area.value = current ? current + ', ' + m.name : m.name;
+                    renderPreview();
+                });
+                vocalWrap.appendChild(vbtn);
+            }
+
+            // Instrumental suggestions: one pill per non-vocal skill like "Guitarra: Gabriel"
+            const nonVocalSkills = skills.filter(s => !isVocalSkill(s));
+            if (nonVocalSkills.length === 0 && !hasVocal) {
+                // fallback: generic name pill to instrumental
+                const ibtn = document.createElement('button');
+                ibtn.type = 'button';
+                ibtn.className = 'btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small';
+                ibtn.style.fontSize = '0.7rem';
+                ibtn.textContent = m.name;
+                ibtn.title = skills.join(', ');
+                ibtn.addEventListener('click', () => {
+                    const area = document.getElementById('instrumentalTeam');
+                    const current = area.value.trim();
+                    area.value = current ? current + '\n' + m.name : m.name;
+                    renderPreview();
+                });
+                instWrap.appendChild(ibtn);
+            } else {
+                nonVocalSkills.forEach(s => {
+                    const label = `${s}: ${m.name}`;
+                    const ibtn = document.createElement('button');
+                    ibtn.type = 'button';
+                    ibtn.className = 'btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small';
+                    ibtn.style.fontSize = '0.7rem';
+                    ibtn.textContent = label;
+                    ibtn.title = skills.join(', ');
+                    ibtn.addEventListener('click', () => {
+                        const area = document.getElementById('instrumentalTeam');
+                        const current = area.value.trim();
+                        area.value = current ? current + '\n' + label : label;
+                        renderPreview();
+                    });
+                    instWrap.appendChild(ibtn);
+                });
+            }
+        });
+    }
+
+    const STORAGE_KEY = "imaestry_setlists_v2";
+
+    // ============================================================
+    //  ESTADO
+    // ============================================================
+    let currentId = null; // Local mock ID
+    let dbId = null;      // REAL Database ID
+    let moments = [];
+    let activeMomentIndex = 0;
+    // Datas selecionadas: [{ date: 'YYYY-MM-DD', label: 'Ensaio'|'Culto'|'Evento'|'Outro' }]
+    let selectedDays = [];
+
+    // Bootstrap helpers
+    const toastEl = document.getElementById("appToast");
+    const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2000 });
+
+    function showToast(msg) {
+        document.getElementById("toastMsg").textContent = msg;
+        toast.show();
+    }
+
+    function escapeHtml(str) {
+        return String(str || "")
+            .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+
+    // ============================================================
+    //  DEFAULTS & RESET
+    // ============================================================
+    function defaultMoments() {
+        return [
+            { title: "MANHÃ ::: E.B.D ::: (Momento 1)", items: [] },
+            { title: "NOITE ::: VESPERTINO ::: (Momento 2)", items: [] },
+        ];
+    }
+
+    function resetBuilder() {
+        dbId = null;
+        document.getElementById("setNumber").value = "";
+        document.getElementById("weekDay").value = "Dom";
+        document.getElementById("monthName").value = "Fevereiro";
+        // limpa datas
+        selectedDays = [];
+        renderDaysList();
+        if (window._daysPicker) { window._daysPicker.clear(); }
+        document.getElementById("instrumentalTeam").value = "";
+        document.getElementById("vocalTeam").value = "";
+        document.getElementById("hasSantaCeia").checked = false;
+        moments = defaultMoments();
+        activeMomentIndex = 0;
+        renderMoments();
+        renderPreview();
+        renderSetlistsList();
+        document.getElementById("btnDeleteCurrent").disabled = true;
+    }
+
+    // ============================================================
+    //  RENDER MOMENTS
+    // ============================================================
+    function renderMoments() {
+        const container = document.getElementById("momentsContainer");
+        container.innerHTML = "";
+
+        moments.forEach((m, idx) => {
+            const isActive = idx === activeMomentIndex;
+            const card = document.createElement("div");
+            card.className = `moment-card mb-3 ${isActive ? "active-moment" : ""}`;
+
+            // Header
+            let headerHTML = `
+                <div class="moment-header" style="background: color-mix(in srgb, var(--bs-primary) ${isActive ? '8' : '3'}%, transparent);">
+                    <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-outline-primary'} rounded-pill" data-action="set-active" data-idx="${idx}">
+                        <i class="bi bi-lightning-charge"></i>
+                    </button>
+                    <input class="form-control form-control-sm flex-grow-1 rounded-3 fw-bold" value="${escapeHtml(m.title)}"
+                           data-action="edit-title" data-idx="${idx}" style="max-width: 350px;" />
+                    <div class="ms-auto d-flex gap-1">
+                        <button class="btn btn-sm btn-primary rounded-pill" data-action="add-music" data-idx="${idx}" title="Adicionar Música">
+                            <i class="bi bi-plus-lg me-1"></i><span class="d-none d-md-inline">Música</span>
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill" data-action="add-offertory" data-idx="${idx}" title="Ofertas">
+                            <i class="bi bi-cash-coin"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info rounded-pill" data-action="add-message" data-idx="${idx}" title="Mensagem/Pregação">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" data-action="delete-moment" data-idx="${idx}" title="Remover Momento">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Items
+            let itemsHTML = '<div class="moment-items d-grid gap-2">';
+            if (m.items.length === 0) {
+                itemsHTML += `<div class="text-muted small text-center py-2">
+                    <i class="bi bi-music-note me-1"></i>Nenhum item. Adicione músicas, ofertas ou pregação.
+                </div>`;
+            } else {
+                m.items.forEach((it, itIdx) => {
+                    let typeClass = '';
+                    let iconHTML = '';
+                    let titleHTML = '';
+                    let subtitleHTML = '';
+
+                    if (it.type === "music") {
+                        typeClass = '';
+                        iconHTML = `<span class="badge bg-dark rounded-pill me-2">${escapeHtml(it.key)}</span>`;
+                        titleHTML = escapeHtml(it.title);
+                        subtitleHTML = `<small class="text-muted">${escapeHtml(it.artist || it.category || it.kind || 'Música')}</small>`;
+                    } else if (it.type === "offertory") {
+                        typeClass = 'item-offertory';
+                        iconHTML = `<i class="bi bi-cash-coin text-warning me-2 fs-5"></i>`;
+                        titleHTML = '<span class="fw-bold">Ofertas</span>';
+                        subtitleHTML = '';
+                    } else if (it.type === "message") {
+                        typeClass = 'item-message';
+                        iconHTML = `<i class="bi bi-mic-fill text-info me-2 fs-5"></i>`;
+                        titleHTML = '<span class="fw-bold">MENSAGEM / PREGAÇÃO</span>';
+                        subtitleHTML = '';
+                    }
+
+                    itemsHTML += `
+                        <div class="setlist-item ${typeClass}">
+                            <div class="d-flex align-items-center flex-grow-1 min-width-0">
+                                ${iconHTML}
+                                <div class="text-truncate">
+                                    <div class="fw-semibold text-truncate">${titleHTML}</div>
+                                    ${subtitleHTML}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                <button class="btn btn-sm btn-link text-muted p-1" data-action="move-up" data-idx="${idx}" data-it="${itIdx}" title="Mover acima">
+                                    <i class="bi bi-chevron-up"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link text-muted p-1" data-action="move-down" data-idx="${idx}" data-it="${itIdx}" title="Mover abaixo">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link text-danger p-1" data-action="remove-item" data-idx="${idx}" data-it="${itIdx}" title="Remover">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            itemsHTML += '</div>';
+
+            card.innerHTML = headerHTML + itemsHTML;
+            container.appendChild(card);
+        });
+    }
+
+    // ============================================================
+    //  REPERTOIRE MODAL
+    // ============================================================
+    function openRepertoireModal(forMomentIdx) {
+        activeMomentIndex = forMomentIdx;
+        renderMoments();
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("repertoireModal"));
+        document.getElementById("repSearch").value = "";
+        renderRepertoireList("");
+        modal.show();
+    }
+
+    function renderRepertoireList(filter) {
+        const list = document.getElementById("repertoireList");
+        list.innerHTML = "";
+        const q = (filter || "").trim().toLowerCase();
+
+        const filtered = REPERTOIRE.filter(m =>
+            (m.title + " " + m.artist + " " + m.key + " " + m.category).toLowerCase().includes(q)
+        );
+
+        filtered.forEach(m => {
+            const a = document.createElement("button");
+            a.type = "button";
+            a.className = "list-group-item list-group-item-action rep-item d-flex align-items-center justify-content-between p-3";
+            a.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    ${m.key ? `<span class="badge bg-dark rounded-pill px-2">${escapeHtml(m.key)}</span>` : ''}
+                    <div>
+                        <div class="fw-bold">${escapeHtml(m.title)}</div>
+                        <small class="text-muted">${escapeHtml(m.artist)}${m.category ? ' • ' + escapeHtml(m.category) : ''}</small>
+                    </div>
+                </div>
+                <span class="badge bg-primary rounded-pill">
+                    <i class="bi bi-plus-lg"></i>
+                </span>
+            `;
+            a.addEventListener("click", () => {
+                moments[activeMomentIndex].items.push({
+                    type: "music",
+                    repId: m.id,
+                    title: m.title,
+                    artist: m.artist,
+                    key: m.key,
+                    category: m.category,
+                    kind: m.category || "Música"
+                });
+                renderMoments();
+                renderPreview();
+                showToast(`"${m.title}" adicionada!`);
+            });
+            list.appendChild(a);
+        });
+
+        if (!filtered.length) {
+            list.innerHTML = `<div class="text-muted text-center py-4">
+                <i class="bi bi-search me-2"></i>Nenhuma música encontrada.
+            </div>`;
+        }
+    }
+
+    // ============================================================
+    //  PREVIEW
+    // ============================================================
+    function buildHeader() {
+        const num = document.getElementById("setNumber").value || "?";
+        const wd = document.getElementById("weekDay").value || "";
+        const days = computeDaysText();
+        const month = document.getElementById("monthName").value || "";
+        return `::: ${num}ª :: Setlist - ${wd} (${days}) de ${month} :::`;
+    }
+
+    function renderPreview() {
+        const instrumental = (document.getElementById("instrumentalTeam").value || "").trim();
+        const vocal = (document.getElementById("vocalTeam").value || "").trim();
+        const hasCeia = document.getElementById("hasSantaCeia").checked;
+
+        let out = buildHeader() + "\n\n";
+        out += "EQUIPE INSTRUMENTAL:\n";
+        if (instrumental) {
+            instrumental.split("\n").forEach(line => out += `- ${line.trim()}\n`);
+        } else {
+            out += "- (não definido)\n";
+        }
+
+        out += "\nVocal:\n";
+        if (vocal) {
+            const lines = vocal.includes("\n") ? vocal.split("\n") : vocal.split(",");
+            out += "- " + lines.map(x => x.trim()).filter(Boolean).join(", ") + "\n";
+        } else {
+            out += "- (não definido)\n";
+        }
+
+        moments.forEach(m => {
+            out += "\n------------------------------------\n";
+            out += `${m.title}\n`;
+            out += "------------------------------------\n\n";
+
+            m.items.forEach(it => {
+                if (it.type === "music") {
+                    out += `( ${it.key || '?'} ) ${it.title}\t\t-> (${it.kind || it.category || 'Música'})\n`;
+                }
+                if (it.type === "offertory") {
+                    out += "\nOfertas\n";
+                }
+                if (it.type === "message") {
+                    out += "\nMENSAGEM/PREGAÇÃO\n";
+                    if (hasCeia) {
+                        out += "(Pós pregação: 2 cânticos - Santa Ceia)\n";
+                    }
+                    out += "\n";
+                }
+            });
+        });
+
+        document.getElementById("previewBox").textContent = out.trim();
+    }
+
+    // ============================================================
+    //  CRUD (API Integration)
+    // ============================================================
+    function serializeCurrent() {
+        return {
+            db_id: dbId,
+            team_id: document.getElementById("teamSelect").value,
+            meta: {
+                number: Number(document.getElementById("setNumber").value || 0),
+                weekDay: document.getElementById("weekDay").value || "",
+                month: document.getElementById("monthName").value || "",
+                daysText: computeDaysText(),
+                days: structuredClone(selectedDays),
+                hasSantaCeia: document.getElementById("hasSantaCeia").checked
+            },
+            teams: {
+                instrumental: document.getElementById("instrumentalTeam").value || "",
+                vocal: document.getElementById("vocalTeam").value || ""
+            },
+            moments: structuredClone(moments),
+            previewText: document.getElementById("previewBox").textContent
+        };
+    }
+
+    async function saveCurrent() {
+        const data = serializeCurrent();
+        try {
+            const resp = await fetch("{% url 'save_setlist_api' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                dbId = result.id;
+                showToast(result.message);
+                document.getElementById("btnDeleteCurrent").disabled = false;
+                renderSetlistsList();
+            } else {
+                showToast("Erro: " + result.error);
+            }
+        } catch (e) {
+            showToast("Erro de conexão com o servidor.");
+        }
+    }
+
+    async function loadSetlist(id) {
+        try {
+            const resp = await fetch(`/setlist/api/get/${id}/`);
+            const sl = await resp.json();
+            if (sl.error) {
+                showToast("Erro: " + sl.error);
+                return;
+            }
+
+            dbId = sl.id;
+            document.getElementById("teamSelect").value = sl.team_id || document.getElementById("teamSelect").value;
+            document.getElementById("setNumber").value = sl.meta.number || "";
+            document.getElementById("weekDay").value = sl.meta.weekDay || "Dom";
+            document.getElementById("monthName").value = sl.meta.month || "Fevereiro";
+            // Datas estruturadas (se houver)
+            selectedDays = Array.isArray(sl.meta.days) ? sl.meta.days : [];
+            renderDaysList();
+            if (window._daysPicker) {
+                const ds = selectedDays.map(d => d.date);
+                window._daysPicker.setDate(ds, true);
+            }
+            document.getElementById("hasSantaCeia").checked = !!sl.meta.hasSantaCeia;
+            document.getElementById("instrumentalTeam").value = sl.teams.instrumental || "";
+            document.getElementById("vocalTeam").value = sl.teams.vocal || "";
+            moments = sl.moments || defaultMoments();
+            activeMomentIndex = 0;
+
+            renderMoments();
+            renderPreview();
+            document.getElementById("btnDeleteCurrent").disabled = false;
+            showToast("Setlist carregada.");
+        } catch (e) {
+            showToast("Erro ao carregar do servidor.");
+        }
+    }
+
+    async function deleteCurrent() {
+        if (!dbId) return;
+        if (!confirm("Tem certeza que deseja excluir esta setlist do banco de dados?")) return;
+        try {
+            const resp = await fetch(`/setlist/api/delete/${dbId}/`, { method: 'POST' });
+            const result = await resp.json();
+            if (result.success) {
+                showToast(result.message);
+                resetBuilder();
+            } else {
+                showToast("Erro: " + result.error);
+            }
+        } catch (e) {
+            showToast("Erro ao excluir.");
+        }
+    }
+
+    async function renderSetlistsList() {
+        const wrap = document.getElementById("setlistsList");
+        const q = (document.getElementById("searchSetlists").value || "").trim().toLowerCase();
+
+        try {
+            const resp = await fetch("{% url 'list_setlists_api' %}");
+            const data = await resp.json();
+            const all = data.setlists || [];
+
+            const filtered = all.filter(x => (x.header + " " + x.team).toLowerCase().includes(q));
+
+            wrap.innerHTML = "";
+            filtered.forEach(sl => {
+                const btn = document.createElement("div");
+                btn.className = "saved-setlist-item";
+                btn.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold small">${escapeHtml(sl.header)}</div>
+                            <div class="text-muted small">${escapeHtml(sl.team)}</div>
+                            <div class="text-muted small mt-1" style="font-size:0.7rem;">
+                                Atualizada: ${new Date(sl.updatedAt).toLocaleString("pt-BR")}
+                            </div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">${sl.musicCount} <i class="bi bi-music-note"></i></span>
+                    </div>
+                `;
+                btn.addEventListener("click", () => {
+                    loadSetlist(sl.id);
+                    bootstrap.Offcanvas.getOrCreateInstance(document.getElementById("offcanvasList")).hide();
+                });
+                wrap.appendChild(btn);
+            });
+
+            if (!filtered.length) {
+                wrap.innerHTML = `<div class="text-muted small text-center py-4">
+                    <i class="bi bi-inbox me-2"></i>Nenhuma setlist encontrada.
+                </div>`;
+            }
+        } catch (e) {
+            wrap.innerHTML = `<div class="text-danger small p-3 text-center">Erro ao carregar lista.</div>`;
+        }
+    }
+
+    // ============================================================
+    //  EVENT LISTENERS
+    // ============================================================
+    // Form inputs → re-render preview
+    document.addEventListener("input", (e) => {
+        const id = e.target?.id;
+        if (["setNumber", "weekDay", "monthName", "instrumentalTeam", "vocalTeam"].includes(id)) {
+            renderPreview();
+        }
+        if (id === "repSearch") renderRepertoireList(e.target.value);
+        if (id === "searchSetlists") renderSetlistsList();
+
+        // Moment title edit
+        const inp = e.target.closest('input[data-action="edit-title"]');
+        if (inp) {
+            moments[Number(inp.getAttribute("data-idx"))].title = inp.value;
+            renderPreview();
+        }
+    });
+
+    document.addEventListener("change", (e) => {
+        if (e.target?.id === "hasSantaCeia") renderPreview();
+        if (["weekDay", "monthName"].includes(e.target?.id)) renderPreview();
+        if (e.target?.id === "teamSelect") fetchTeamMembers(e.target.value);
+    });
+
+    // Action buttons
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const idx = Number(btn.getAttribute("data-idx"));
+        const it = Number(btn.getAttribute("data-it"));
+
+        if (action === "set-active") { activeMomentIndex = idx; renderMoments(); }
+        if (action === "add-music") { openRepertoireModal(idx); }
+        if (action === "add-offertory") {
+            moments[idx].items.push({ type: "offertory" });
+            renderMoments(); renderPreview();
+            showToast("Ofertas adicionadas.");
+        }
+        if (action === "add-message") {
+            moments[idx].items.push({ type: "message" });
+            renderMoments(); renderPreview();
+            showToast("Mensagem/Pregação adicionada.");
+        }
+        if (action === "delete-moment") {
+            if (moments.length <= 1) { showToast("Precisa ter ao menos 1 momento."); return; }
+            moments.splice(idx, 1);
+            activeMomentIndex = Math.max(0, Math.min(activeMomentIndex, moments.length - 1));
+            renderMoments(); renderPreview();
+            showToast("Momento removido.");
+        }
+        if (action === "remove-item") {
+            moments[idx].items.splice(it, 1);
+            renderMoments(); renderPreview();
+        }
+        if (action === "move-up" && it > 0) {
+            [moments[idx].items[it - 1], moments[idx].items[it]] = [moments[idx].items[it], moments[idx].items[it - 1]];
+            renderMoments(); renderPreview();
+        }
+        if (action === "move-down" && it < moments[idx].items.length - 1) {
+            [moments[idx].items[it + 1], moments[idx].items[it]] = [moments[idx].items[it], moments[idx].items[it + 1]];
+            renderMoments(); renderPreview();
+        }
+    });
+
+    // Top buttons
+    document.getElementById("btnNew").addEventListener("click", resetBuilder);
+    document.getElementById("btnSave").addEventListener("click", saveCurrent);
+    document.getElementById("btnAddMoment").addEventListener("click", () => {
+        moments.push({ title: `NOVO MOMENTO ::: (Momento ${moments.length + 1})`, items: [] });
+        activeMomentIndex = moments.length - 1;
+        renderMoments(); renderPreview();
+        showToast("Momento adicionado.");
+    });
+
+    document.getElementById("btnAutoAddCeia").addEventListener("click", () => {
+        if (!document.getElementById("hasSantaCeia").checked) {
+            showToast("Marque 'Santa Ceia' primeiro.");
+            return;
+        }
+        // Try to find "pós pregação" songs or just add placeholders
+        const picks = REPERTOIRE.filter(x => (x.category || "").toLowerCase().includes("ceia") || (x.category || "").toLowerCase().includes("pós"));
+        if (picks.length >= 2) {
+            moments[activeMomentIndex].items.push(
+                { type: "music", repId: picks[0].id, title: picks[0].title, key: picks[0].key, kind: picks[0].category },
+                { type: "music", repId: picks[1].id, title: picks[1].title, key: picks[1].key, kind: picks[1].category },
+            );
+            showToast("Sugestões adicionadas.");
+        } else {
+            showToast("Nenhuma música de 'Pós Pregação' encontrada no repertório.");
+        }
+        renderMoments(); renderPreview();
+    });
+
+    document.getElementById("btnCopy").addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(document.getElementById("previewBox").textContent);
+            showToast("Prévia copiada! ✓");
+        } catch {
+            showToast("Erro ao copiar (permissão do navegador).");
+        }
+    });
+
+    document.getElementById("btnDeleteCurrent").addEventListener("click", deleteCurrent);
+
+    document.getElementById("btnExportJson").addEventListener("click", () => {
+        const data = serializeCurrent();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `setlist_${data.meta.number || "nova"}_${data.meta.month || "mes"}.json`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast("JSON exportado!");
+    });
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    function toIsoDate(d) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatPtBr(iso) {
+        const [y, m, d] = (iso || '').split('-');
+        if (!y || !m || !d) return iso || '';
+        return `${d}/${m}/${y}`;
+    }
+
+    function computeDaysText() {
+        if (!selectedDays.length) return '';
+        return selectedDays
+            .map(d => `${formatPtBr(d.date)}${d.label ? ` (${d.label})` : ''}`)
+            .join(', ');
+    }
+
+    function renderDaysList() {
+        const wrap = document.getElementById('daysList');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        if (!selectedDays.length) {
+            wrap.innerHTML = `<div class="text-muted small">Nenhuma data selecionada ainda.</div>`;
+            renderPreview();
+            return;
+        }
+        selectedDays.forEach((d, idx) => {
+            const chip = document.createElement('div');
+            chip.className = 'day-chip';
+            chip.innerHTML = `
+                <span class="badge bg-light text-dark border">${formatPtBr(d.date)}</span>
+                <select class="form-select form-select-sm w-auto" data-days-idx="${idx}">
+                        <option ${d.label==='Ensaio'?'selected':''}>Ensaio</option>
+                        <option ${d.label==='Culto'?'selected':''}>Culto</option>
+                        <option ${d.label==='Evento'?'selected':''}>Evento</option>
+                        <option ${d.label==='Outro'?'selected':''}>Outro</option>
+                </select>
+                <button class="btn btn-sm btn-outline-danger remove" data-remove-day="${idx}"><i class="bi bi-x-lg"></i></button>
+            `;
+            wrap.appendChild(chip);
+        });
+        renderPreview();
+    }
+
+    function syncDaysFromPicker(selectedDates) {
+        const existing = new Map(selectedDays.map(d => [d.date, d.label]));
+        const next = [];
+        for (const d of selectedDates) {
+            const iso = toIsoDate(d);
+            next.push({ date: iso, label: existing.get(iso) || '' });
+        }
+        selectedDays = next;
+        renderDaysList();
+    }
+
+    // init flatpickr
+    window._daysPicker = flatpickr('#daysPicker', {
+        mode: 'multiple',
+        dateFormat: 'd/m/Y',
+        locale: flatpickr.l10ns.pt,
+        onChange: (selectedDates) => syncDaysFromPicker(selectedDates)
+    });
+
+    // Change handlers for days list (delegated)
+    document.addEventListener('change', (e) => {
+        const sel = e.target.closest('select[data-days-idx]');
+        if (sel) {
+            const i = Number(sel.getAttribute('data-days-idx'));
+            if (selectedDays[i]) {
+                selectedDays[i].label = sel.value;
+                renderPreview();
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-remove-day]');
+        if (btn) {
+            const i = Number(btn.getAttribute('data-remove-day'));
+            selectedDays.splice(i, 1);
+            renderDaysList();
+            // also update picker UI
+            if (window._daysPicker) {
+                window._daysPicker.setDate(selectedDays.map(d => d.date), true);
+            }
+        }
+    });
+
+    const startTeamId = document.getElementById("teamSelect").value;
+    if (startTeamId) fetchTeamMembers(startTeamId);
+    renderSetlistsList();
+    resetBuilder();
+</script>
+{% endblock %}

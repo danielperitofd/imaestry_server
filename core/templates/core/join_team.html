@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Entrar em Equipe{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h4 class="fw-bold mb-4">Entrar em uma Equipe</h4>
+            <p class="text-muted mb-4">Insira o código de convite fornecido pelo líder da equipe.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_code" class="form-label fw-bold">Código de Convite</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                    <div class="text-danger small mt-1">{{ form.code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold">Entrar na Equipe</button>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'home' %}" class="text-decoration-none small">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

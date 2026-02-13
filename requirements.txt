@@ -1,0 +1,7 @@
+django
+oracledb
+python-dotenv
+Pillow
+requests
+gunicorn
+whitenoise

@@ -1,0 +1,489 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cadastro de Músico | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Novo Músico</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cadastros' %}">Cadastros</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Novo Músico</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row g-4">
+        <!-- LEFT: Main Form -->
+        <div class="col-lg-8">
+
+            <!-- Photo Upload Card -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-4">
+                        <!-- Avatar Upload -->
+                        <div class="photo-upload-area" onclick="document.getElementById('id_photo').click()">
+                            <img id="photo-preview" class="photo-preview-img d-none" alt="Preview">
+                            <div id="photo-placeholder" class="photo-placeholder">
+                                <i class="bi bi-camera-fill"></i>
+                            </div>
+                            <div class="photo-overlay">
+                                <i class="bi bi-pencil-fill text-white"></i>
+                            </div>
+                            <input type="file" name="photo" id="id_photo" class="d-none" accept="image/*"
+                                onchange="previewImage(this)">
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">Foto do Músico</h5>
+                            <p class="text-muted small mb-1">Clique no avatar para selecionar uma foto</p>
+                            <p class="text-muted small mb-0" style="font-size: 0.7rem;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Formatos aceitos: JPG, PNG (máx. 5MB)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Info Card -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-person-fill me-2 text-primary"></i>
+                        Dados Pessoais
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_first_name" class="form-label fw-bold">
+                                <i class="bi bi-person me-1 text-primary"></i>
+                                Nome <span class="text-danger">*</span>
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_last_name" class="form-label fw-bold">
+                                Sobrenome
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_username" class="form-label fw-bold">
+                                <i class="bi bi-at me-1 text-secondary"></i>
+                                Usuário <span class="text-danger">*</span>
+                            </label>
+                            {{ form.username }}
+                            <div class="form-text">Usado para login no sistema.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_date_of_birth" class="form-label fw-bold">
+                                <i class="bi bi-calendar-event me-1 text-secondary"></i>
+                                Data de Nascimento
+                            </label>
+                            {{ form.date_of_birth }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Card -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-shield-lock-fill me-2 text-warning"></i>
+                        Segurança
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_password" class="form-label fw-bold">
+                                <i class="bi bi-lock me-1 text-warning"></i>
+                                Senha <span class="text-danger">*</span>
+                            </label>
+                            {{ form.password }}
+                            <div class="form-text">Mínimo de 6 caracteres.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_confirm_password" class="form-label fw-bold">
+                                <i class="bi bi-lock-fill me-1 text-warning"></i>
+                                Confirmar Senha <span class="text-danger">*</span>
+                            </label>
+                            {{ form.confirm_password }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Card -->
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-music-note-list me-2 text-success"></i>
+                        Habilidades Musicais
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Selecione os instrumentos e habilidades deste músico.</p>
+
+                    <div class="skills-grid">
+                        {% for skill in skills %}
+                        <div class="skill-card" onclick="toggleSkill(this)">
+                            <input type="checkbox" name="skills" value="{{ skill.id }}" class="d-none" {% if skill.id in selected_skills %}checked{% endif %}>
+
+                            <div class="skill-icon">
+                                {% if skill.icon_class %}
+                                <i class="bi {{ skill.icon_class }}"></i>
+                                {% else %}
+                                <i class="bi bi-music-note-beamed"></i>
+                                {% endif %}
+                            </div>
+                            <span class="skill-name">{{ skill.name }}</span>
+
+                            <div class="skill-check">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Actions & Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm rounded-4 overflow-hidden mb-4 sticky-top" style="top: 80px;">
+                <div class="card-header py-3 border-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-rocket-takeoff me-2"></i>
+                        Ações
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill mb-2">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Salvar Cadastro
+                    </button>
+                    <a href="{% url 'cadastros' %}" class="btn btn-outline-secondary w-100 py-2 fw-bold rounded-pill">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancelar
+                    </a>
+
+                    <hr class="my-3">
+
+                    <!-- Selected skills counter -->
+                    <div class="d-flex align-items-center justify-content-between mb-3 p-3 rounded-3"
+                        style="background: color-mix(in srgb, var(--bs-primary) 8%, transparent);">
+                        <div>
+                            <small class="fw-bold d-block">Habilidades</small>
+                            <small class="text-muted">Selecionadas</small>
+                        </div>
+                        <div class="skills-counter fw-bold fs-4 text-primary" id="skillsCounter">0</div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Tips -->
+                    <div class="tips-section">
+                        <h6 class="fw-bold small text-uppercase text-muted mb-3">
+                            <i class="bi bi-lightbulb me-1"></i> Dicas
+                        </h6>
+
+                        <div class="tip-item d-flex align-items-start mb-3">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-person-check text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Acesso ao sistema</small>
+                                <small class="text-muted">O músico poderá fazer login com o usuário e senha
+                                    definidos.</small>
+                            </div>
+                        </div>
+
+                        <div class="tip-item d-flex align-items-start mb-3">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-music-note text-success"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Habilidades</small>
+                                <small class="text-muted">As habilidades ajudam na organização de escalas e
+                                    funções.</small>
+                            </div>
+                        </div>
+
+                        <div class="tip-item d-flex align-items-start">
+                            <div class="tip-icon me-2">
+                                <i class="bi bi-image text-warning"></i>
+                            </div>
+                            <div>
+                                <small class="fw-bold d-block">Foto</small>
+                                <small class="text-muted">A foto facilita a identificação e aparece no perfil.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    /* Photo Upload Area */
+    .photo-upload-area {
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        border: 3px dashed var(--border-color, #dee2e6);
+        transition: all 0.3s ease;
+    }
+
+    .photo-upload-area:hover {
+        border-color: var(--bs-primary);
+        transform: scale(1.05);
+    }
+
+    .photo-upload-area:hover .photo-overlay {
+        opacity: 1;
+    }
+
+    .photo-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 10%, transparent),
+                color-mix(in srgb, var(--bs-primary) 20%, transparent));
+        color: var(--bs-primary);
+        font-size: 1.8rem;
+    }
+
+    .photo-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .photo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        font-size: 1.2rem;
+    }
+
+    /* Skills Grid - Card Style */
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+
+    .skill-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 10px;
+        border-radius: 16px;
+        border: 2px solid var(--border-color, #dee2e6);
+        background: var(--card-bg, #ffffff);
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+        text-align: center;
+    }
+
+    .skill-card:hover {
+        border-color: var(--bs-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .skill-card.active {
+        border-color: var(--bs-primary);
+        background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+    }
+
+    .skill-card.active .skill-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .skill-card.active .skill-icon {
+        background: var(--bs-primary);
+        color: white;
+    }
+
+    .skill-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+        background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+        color: var(--bs-primary);
+        transition: all 0.25s ease;
+    }
+
+    .skill-name {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--title-color, #333);
+    }
+
+    .skill-check {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        color: var(--bs-primary);
+        font-size: 1rem;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.25s ease;
+    }
+
+    /* Tip items */
+    .tip-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--card-bg, #ffffff) 90%, var(--bs-primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    /* Form enhancements */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary) 25%, transparent);
+    }
+
+    .form-text {
+        font-size: 0.75rem;
+        color: var(--subtitle-color, #6c757d);
+    }
+
+    /* Custom Icon Emoji Overrides */
+    .bi-sax::before {
+        content: "\1F3B7" !important;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif !important;
+        font-style: normal;
+        filter: grayscale(100%);
+        line-height: 1;
+    }
+
+    .bi-piano::before {
+        content: "\1F3B9" !important;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif !important;
+        font-style: normal;
+        filter: grayscale(100%);
+        line-height: 1;
+    }
+
+    .bi-accordion::before {
+        content: "\1FA97" !important;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif !important;
+        font-style: normal;
+        filter: grayscale(100%);
+        line-height: 1;
+    }
+
+    .bi-bass::before,
+    .bi-guitar::before {
+        content: "\1F3B8" !important;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif !important;
+        font-style: normal;
+        filter: grayscale(100%);
+        line-height: 1;
+    }
+
+    .bi-drums::before {
+        content: "\1F941" !important;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif !important;
+        font-style: normal;
+        filter: grayscale(100%);
+        line-height: 1;
+    }
+
+    .skill-card.active .bi-sax::before,
+    .skill-card.active .bi-piano::before,
+    .skill-card.active .bi-accordion::before,
+    .skill-card.active .bi-bass::before,
+    .skill-card.active .bi-guitar::before,
+    .skill-card.active .bi-drums::before {
+        filter: grayscale(0%);
+    }
+</style>
+
+<script>
+    // Photo preview
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('photo-preview');
+                var placeholder = document.getElementById('photo-placeholder');
+
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Toggle skill card selection
+    function toggleSkill(card) {
+        var checkbox = card.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        card.classList.toggle('active', checkbox.checked);
+        updateSkillsCounter();
+    }
+
+    // Update skills counter
+    function updateSkillsCounter() {
+        var checked = document.querySelectorAll('.skill-card input[type="checkbox"]:checked').length;
+        document.getElementById('skillsCounter').textContent = checked;
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mark pre-selected skills
+        document.querySelectorAll('.skill-card input[type="checkbox"]:checked').forEach(function (cb) {
+            cb.closest('.skill-card').classList.add('active');
+        });
+        updateSkillsCounter();
+    });
+</script>
+{% endblock %}

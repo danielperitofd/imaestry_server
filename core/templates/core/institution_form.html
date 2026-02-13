@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cadastro de Instituição{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+
+            <!-- Tabs -->
+            <ul class="nav nav-pills nav-fill mb-4 bg-light rounded-pill p-1">
+                <li class="nav-item">
+                    <a class="nav-link rounded-pill text-muted" href="{% url 'musician_registration' %}">Músico</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active rounded-pill bg-white shadow-sm fw-bold text-primary"
+                        href="#">Instituição</a>
+                </li>
+            </ul>
+
+            <h4 class="fw-bold mb-4 text-center">
+                {% if is_edit %}Editar Instituição{% else %}Nova Instituição{% endif %}
+            </h4>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3 text-center">
+                    <label for="id_photo" class="d-block mb-2 fw-bold text-muted small">Logo da Instituição</label>
+                    <div class="position-relative d-inline-block">
+                        <div style="width: 100px; height: 100px; border-radius: 50%; background-color: #f8f9fa; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center; overflow: hidden;"
+                            id="photo-preview">
+                            {% if is_edit and institution.photo %}
+                            <img src="{{ institution.photo.url }}"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            <i class="bi bi-building text-muted fs-1"></i>
+                            {% endif %}
+                        </div>
+                        <label for="id_photo"
+                            class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0 shadow-sm"
+                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-camera-fill small"></i>
+                        </label>
+                    </div>
+                    <div class="d-none">
+                        {{ form.photo }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_name" class="form-label fw-bold">Nome da Instituição</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_responsible_name" class="form-label fw-bold">Responsável</label>
+                        {{ form.responsible_name }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id_phone" class="form-label fw-bold">Telefone</label>
+                        {{ form.phone }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_address" class="form-label fw-bold">Endereço</label>
+                    {{ form.address }}
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">
+                        {% if is_edit %}Salvar Alterações{% else %}Cadastrar Instituição{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple script to preview image
+    document.getElementById('id_photo').addEventListener('change', function (event) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('photo-preview');
+                preview.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; object-fit: cover;">';
+                preview.style.border = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

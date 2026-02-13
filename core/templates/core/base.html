@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+{% load static %}
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iMaestro - {% block title %}Home{% endblock %}</title>
+    <!-- Bootstrap 5 CSS (local) -->
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Bootstrap Icons (local) -->
+    <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% include "core/includes/theme_css.html" %}
+    {% include "core/includes/theme_js.html" %}
+</head>
+
+<body class="{% if request.user.is_authenticated %}with-sidebar{% else %}no-sidebar{% endif %}">
+
+    {% if request.user.is_authenticated %}
+    <!-- Mobile Header -->
+    <div class="mobile-header d-md-none">
+        <button class="mobile-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebarOffcanvas"
+            aria-controls="appSidebarOffcanvas" aria-label="Abrir menu">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="fw-bold fs-5">iMaestro</span>
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- Sidebar -->
+    {% if request.user.is_authenticated %}
+    <div class="sidebar d-none d-md-flex flex-column">
+        {% include "core/includes/sidebar_nav.html" %}
+    </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+    <!-- Mobile Offcanvas Sidebar -->
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="appSidebarOffcanvas"
+        aria-labelledby="appSidebarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="appSidebarLabel">iMaestro</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-3">
+            {% include "core/includes/sidebar_nav.html" %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="main-content d-flex flex-column min-vh-100">
+        <div class="container-fluid flex-grow-1">
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm"
+                    role="alert">
+                    {% if message.tags == 'success' %}
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {% elif message.tags == 'error' %}
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    {% else %}
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (local) -->
+    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // No custom JS needed; mobile menu uses Bootstrap Offcanvas
+    </script>
+</body>
+
+</html>

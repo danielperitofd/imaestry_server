@@ -1,0 +1,443 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Home | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Welcome Header -->
+<div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="home-welcome-banner p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-music-note-beamed me-2"></i>
+                    Olá, {{ request.user.first_name|default:request.user.username }}!
+                </h2>
+                <p class="mb-0 opacity-75">Gerencie suas equipes, escalas e repertório em um só lugar.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'create_team' %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                    <i class="bi bi-plus-lg me-1"></i> Criar Equipe
+                </a>
+                <a href="{% url 'join_team' %}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar com Código
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Teams Section -->
+<div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0">
+            <i class="bi bi-people-fill me-2 text-primary"></i>
+            Minhas Equipes
+            <span class="badge bg-primary rounded-pill ms-1">{{ teams|length }}</span>
+        </h5>
+    </div>
+
+    <div class="row g-3">
+        {% for team in teams %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'team_detail' team.id %}" class="text-decoration-none">
+                <div class="card shadow-sm rounded-4 h-100 team-home-card overflow-hidden">
+                    <!-- Mini banner -->
+                    <div class="team-mini-banner">
+                        {% if team.photo %}
+                        <img src="{{ team.photo.url }}" alt="{{ team.name }}">
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <!-- Avatar -->
+                            <div class="team-avatar me-3 flex-shrink-0">
+                                {% if team.photo %}
+                                <img src="{{ team.photo.url }}" class="rounded-3"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                    style="width: 100%; height: 100%; font-size: 1.2rem;">
+                                    {{ team.name|slice:":2"|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex-grow-1 min-width-0">
+                                <h6 class="fw-bold mb-1 text-truncate">{{ team.name }}</h6>
+                                <div class="d-flex gap-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-people me-1"></i>{{ team.members.count }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-music-note-list me-1"></i>{{ team.setlists.count }}
+                                    </small>
+                                    {% if team.recent_likes %}
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart-fill me-1 text-danger"></i>{{ team.recent_likes }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if team.leader == request.user %}
+                            <span class="badge bg-warning text-dark rounded-pill ms-2 flex-shrink-0">
+                                <i class="bi bi-star-fill me-1"></i>Líder
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success rounded-pill ms-2 flex-shrink-0">
+                                <i class="bi bi-check-circle me-1"></i>Membro
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card shadow-sm rounded-4 p-5 text-center">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Nenhuma equipe ainda</h5>
+                <p class="text-muted small mb-3">Crie uma nova equipe ou entre em uma existente com um código de
+                    convite.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'create_team' %}" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-plus-lg me-1"></i>Criar Equipe
+                    </a>
+                    <a href="{% url 'join_team' %}" class="btn btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Entrar com Código
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="row g-4 mb-4">
+    <!-- Avisos -->
+    <div class="col-md-4">
+        <div class="card shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-bell-fill me-2 text-primary"></i>Avisos
+                    <span class="badge bg-primary-subtle text-primary rounded-pill ms-1">{{ announcements|length }}</span>
+                </h6>
+                <a href="{% url 'announcements_list' %}" class="small fw-bold text-decoration-none">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                {% if announcements %}
+                <ul class="list-group list-group-flush">
+                    {% for a in announcements %}
+                    <li class="list-group-item announcement-item collapsed d-flex align-items-start gap-2" style="background: var(--card-bg);">
+                        <div class="announcement-icon me-1">
+                            <i class="bi bi-megaphone text-primary"></i>
+                        </div>
+                        <div class="announcement-content flex-grow-1 min-width-0">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-dark border rounded-pill px-2 team-chip">{{ a.team.name }}</span>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ a.created_at|date:"d/m H:i" }}</small>
+                            </div>
+                            <div class="announcement-message small">{{ a.message }}</div>
+                            <div class="d-flex justify-content-between align-items-center mt-1 announcement-actions">
+                                <div class="d-flex align-items-center gap-2 left-group">
+                                    <form method="post" action="{% url 'toggle_announcement_like' a.id %}" class="m-0 p-0">
+                                        {% csrf_token %}
+                                        <button class="btn btn-sm icon-btn {% if a.id in liked_ids %}text-danger{% else %}text-muted{% endif %}" data-bs-toggle="tooltip" title="Curtir">
+                                            <i class="bi {% if a.id in liked_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                            <span class="small">{{ a.likes.count }}</span>
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-link p-0 small announcement-toggle">Ver mais</button>
+                                </div>
+                                <form method="post" action="{% url 'dismiss_announcement' a.id %}" class="m-0 p-0 right-group">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm icon-btn text-muted" data-bs-toggle="tooltip" title="Dispensar"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-4">
+                    <div class="empty-list-item d-flex align-items-center">
+                        <div class="empty-list-icon me-3">
+                            <i class="bi bi-megaphone text-muted"></i>
+                        </div>
+                        <small class="text-muted">Nenhum aviso no momento.</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Minhas Escalas -->
+    <div class="col-md-4">
+        <div class="card shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-calendar-event-fill me-2 text-success"></i>Minhas Escalas
+                    <span class="badge bg-success-subtle text-success rounded-pill ms-1">0</span>
+                </h6>
+                <a href="#" class="small fw-bold text-decoration-none">Ver todos</a>
+            </div>
+            <div class="card-body p-4">
+                <div class="empty-list-item d-flex align-items-center">
+                    <div class="empty-list-icon me-3">
+                        <i class="bi bi-calendar3 text-muted"></i>
+                    </div>
+                    <small class="text-muted">Nenhuma escala próxima.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aniversariantes -->
+    <div class="col-md-4">
+        <div class="card shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-cake2-fill me-2 text-warning"></i>Aniversariantes
+                    <span class="badge bg-warning-subtle text-warning rounded-pill ms-1">0</span>
+                </h6>
+                <a href="#" class="small fw-bold text-decoration-none">Ver todos</a>
+            </div>
+            <div class="card-body p-4">
+                <div class="empty-list-item d-flex align-items-center">
+                    <div class="empty-list-icon me-3">
+                        <i class="bi bi-cake2 text-muted"></i>
+                    </div>
+                    <small class="text-muted">Nenhum aniversariante este mês.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mb-4">
+    <h5 class="fw-bold mb-3">
+        <i class="bi bi-lightning-fill me-2 text-warning"></i>
+        Ações Rápidas
+    </h5>
+
+    <div class="row g-3">
+        <div class="col-6 col-md">
+            <a href="{% url 'setlist_builder' %}" class="text-decoration-none">
+                <div class="card shadow-sm rounded-4 p-4 text-center h-100 action-card">
+                    <div class="action-icon mx-auto mb-3"
+                        style="background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary, #36C2D7));">
+                        <i class="bi bi-collection-play-fill text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Criar Setlist</h6>
+                    <p class="small text-muted mb-0">Monte sua setlist</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md">
+            <a href="{% url 'add_music_search' %}" class="text-decoration-none">
+                <div class="card shadow-sm rounded-4 p-4 text-center h-100 action-card">
+                    <div class="action-icon mx-auto mb-3 bg-primary">
+                        <i class="bi bi-plus-lg text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Adicionar Música</h6>
+                    <p class="small text-muted mb-0">Cadastre manualmente</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md">
+            <a href="{% url 'repertorio' %}" class="text-decoration-none">
+                <div class="card shadow-sm rounded-4 p-4 text-center h-100 action-card">
+                    <div class="action-icon mx-auto mb-3 bg-purple">
+                        <i class="bi bi-music-note-list text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Repertório</h6>
+                    <p class="small text-muted mb-0">Músicas cadastradas</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md">
+            <a href="{% url 'import_spotify' %}" class="text-decoration-none">
+                <div class="card shadow-sm rounded-4 p-4 text-center h-100 action-card">
+                    <div class="action-icon mx-auto mb-3 bg-success">
+                        <i class="bi bi-spotify text-white"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Importar Spotify</h6>
+                    <p class="small text-muted mb-0">Direto das playlists</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md">
+            <div class="card shadow-sm rounded-4 p-4 text-center h-100 action-card">
+                <div class="action-icon mx-auto mb-3 bg-danger">
+                    <i class="bi bi-fire text-white"></i>
+                </div>
+                <h6 class="fw-bold mb-1">TOP 100</h6>
+                <p class="small text-muted mb-0">Mais tocadas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Welcome Banner */
+    .home-welcome-banner {
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 10%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 10%, transparent));
+    }
+
+    /* Team Cards */
+    .team-home-card {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .team-home-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .team-mini-banner {
+        height: 6px;
+        background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary, #36C2D7));
+        overflow: hidden;
+    }
+
+    .team-mini-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+    }
+
+    .team-avatar {
+        width: 50px;
+        height: 50px;
+    }
+
+    .min-width-0 {
+        min-width: 0;
+    }
+
+    /* Action Cards */
+    .action-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .action-card:hover .action-icon {
+        transform: scale(1.1);
+    }
+
+    .action-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+
+    /* Empty list items */
+    .empty-list-icon {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--card-bg, #f8f9fa) 80%, var(--bs-secondary, #6c757d));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Empty state */
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--bs-primary);
+        opacity: 0.5;
+    }
+
+    /* Announcements responsivity */
+    .announcement-item { padding: .9rem 1rem; }
+    .announcement-content { min-width: 0; }
+    .announcement-message {
+        white-space: pre-wrap;           /* preserva quebras de linha */
+        word-break: break-word;          /* quebra palavras longas */
+        overflow-wrap: anywhere;         /* evita overflow em links grandes */
+        line-height: 1.25rem;
+    }
+    .announcement-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; background: color-mix(in srgb, var(--bs-primary) 15%, transparent); }
+    .icon-btn { background: transparent; border: none; }
+    .team-chip { max-width: 200px; text-overflow: ellipsis; overflow: hidden; }
+    .announcement-actions .btn-link { color: var(--bs-primary); text-decoration: none; }
+    .announcement-actions .btn-link:hover { text-decoration: underline; }
+    .announcement-actions { gap: .25rem; flex-wrap: nowrap; }
+    .announcement-actions .icon-btn { display: inline-flex; align-items: center; gap: .25rem; line-height: 1; }
+    .left-group { flex: 1 1 auto; min-width: 0; }
+    .right-group { flex: 0 0 auto; }
+
+    @media (max-width: 576px) {
+        .announcement-item { padding: .75rem .9rem; }
+        .announcement-item.collapsed .announcement-message {
+            display: -webkit-box;       /* clamp leve em telas pequenas */
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .team-chip { max-width: 140px; }
+    }
+
+    /* iPhone widths and menores */
+    @media (max-width: 430px) {
+        .announcement-icon { width: 30px; height: 30px; }
+        .team-chip { max-width: 120px; font-size: .8rem; }
+        .announcement-message { font-size: .95rem; }
+        .announcement-actions .btn-link { font-size: .9rem; }
+        .announcement-actions .icon-btn { padding: 2px 6px; min-width: 28px; }
+    }
+</style>
+
+<script>
+    // Toggle ver mais/ver menos apenas em mobile
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.announcement-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const item = this.closest('.announcement-item');
+                const collapsed = item.classList.toggle('collapsed');
+                this.textContent = collapsed ? 'Ver mais' : 'Ver menos';
+            });
+        });
+        // Enable tooltips on icons
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    });
+    </script>
+{% endblock %}

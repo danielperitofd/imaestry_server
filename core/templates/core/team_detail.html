@@ -1,0 +1,350 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ team.name }} | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Team Header Banner -->
+<div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="team-detail-banner position-relative">
+        {% if team.photo %}
+        <img src="{{ team.photo.url }}" class="team-detail-banner-img" alt="{{ team.name }}">
+        <div class="team-detail-banner-overlay"></div>
+        {% endif %}
+
+        <div class="team-detail-banner-content position-relative p-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"
+                            class="{% if team.photo %}text-white{% endif %} text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item {% if team.photo %}text-white-50{% else %}active{% endif %}"
+                        aria-current="page">Equipe</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <h2 class="fw-bold m-0 {% if team.photo %}text-white{% endif %}">{{ team.name }}</h2>
+                    {% if team.description %}
+                    <p class="{% if team.photo %}text-white-50{% else %}text-muted{% endif %} small m-0 mt-1">
+                        <i class="bi bi-building me-1"></i>{{ team.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <div
+                        class="badge {% if team.photo %}bg-white bg-opacity-25 text-white{% else %}bg-light text-dark border{% endif %} py-2 px-3 rounded-3">
+                        <i class="bi bi-key-fill me-1 text-warning"></i>
+                        Código: <span class="fw-bold font-monospace">{{ team.code }}</span>
+                    </div>
+                    {% if request.user == team.leader %}
+                    <button class="btn btn-sm btn-primary rounded-pill ms-2" data-bs-toggle="modal" data-bs-target="#sendAnnouncementModal">
+                        <i class="bi bi-megaphone-fill me-1"></i> Enviar Aviso
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card shadow-sm rounded-4 text-center p-3">
+            <div class="stat-icon mx-auto mb-2 bg-primary">
+                <i class="bi bi-people-fill text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-0">{{ team.members.count }}</h4>
+            <small class="text-muted">Membros</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card shadow-sm rounded-4 text-center p-3">
+            <div class="stat-icon mx-auto mb-2 bg-success">
+                <i class="bi bi-music-note-list text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-0">{{ setlist_count|default:"0" }}</h4>
+            <small class="text-muted">Setlists</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card shadow-sm rounded-4 text-center p-3">
+            <div class="stat-icon mx-auto mb-2 bg-warning">
+                <i class="bi bi-calendar-event text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-0">{{ next_events_count|default:"0" }}</h4>
+            <small class="text-muted">Eventos</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card shadow-sm rounded-4 text-center p-3">
+            <div class="stat-icon mx-auto mb-2 bg-info">
+                <i class="bi bi-vinyl-fill text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-0">{{ repertoire_count|default:"0" }}</h4>
+            <small class="text-muted">Músicas</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Members -->
+    <div class="col-lg-5">
+        <!-- Members Card -->
+        <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-people-fill me-2 text-primary"></i>
+                    Membros
+                    <span class="badge bg-primary rounded-pill ms-1">{{ team.members.count }}</span>
+                </h5>
+                {% if request.user.is_staff %}
+                <a href="{% url 'settings_users' %}" class="btn btn-sm btn-outline-primary rounded-circle"
+                    title="Gerenciar Membros">
+                    <i class="bi bi-gear"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="member-list">
+                    {% for item in members_data %}
+                    <div
+                        class="member-item d-flex align-items-center px-4 py-3 {% if item.user == team.leader %}member-leader{% endif %}">
+                        <div class="me-3 position-relative">
+                            {% if item.musician and item.musician.photo %}
+                            <img src="{{ item.musician.photo.url }}" class="rounded-circle"
+                                style="width: 44px; height: 44px; object-fit: cover; border: 2px solid {% if item.user == team.leader %}var(--bs-primary){% else %}transparent{% endif %};">
+                            {% else %}
+                            <div class="rounded-circle {% if item.user == team.leader %}bg-primary{% else %}bg-secondary{% endif %} text-white d-flex align-items-center justify-content-center fw-bold"
+                                style="width: 44px; height: 44px; font-size: 0.9rem;">
+                                {{ item.user.first_name|slice:":1" }}{{ item.user.last_name|slice:":1" }}
+                            </div>
+                            {% endif %}
+
+                            {% if item.user == team.leader %}
+                            <span
+                                class="position-absolute translate-middle badge rounded-pill bg-warning text-dark border border-white"
+                                style="font-size: 0.5rem; top: 0; left: 100%;">
+                                <i class="bi bi-star-fill"></i>
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">{{ item.user.get_full_name|default:item.user.username }}</div>
+                            {% if item.user == team.leader %}
+                            <small class="text-primary fw-bold" style="font-size: 0.7rem;">
+                                <i class="bi bi-star-fill me-1"></i>Líder
+                            </small>
+                            {% else %}
+                            <small class="text-muted" style="font-size: 0.7rem;">Membro</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-lightning-fill me-2 text-warning"></i>
+                    Ações Rápidas
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'repertorio' %}" class="btn btn-primary rounded-pill py-2 fw-bold">
+                        <i class="bi bi-music-note-list me-2"></i>Acessar Repertório
+                    </a>
+                    <button class="btn btn-outline-secondary rounded-pill py-2">
+                        <i class="bi bi-person-plus me-2"></i>Convidar Membro
+                    </button>
+                    {% if request.user == team.leader or request.user.is_staff %}
+                    <a href="{% url 'team_delete' team.id %}" class="btn btn-outline-danger rounded-pill py-2">
+                        <i class="bi bi-trash3 me-2"></i>Excluir Equipe
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Setlist & Activity -->
+    <div class="col-lg-7">
+        <!-- Last Setlist Card -->
+        <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 border-0">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-collection-play-fill me-2 text-success"></i>
+                    Último Setlist
+                </h5>
+            </div>
+
+            {% if last_setlist %}
+            <div class="card-body p-0">
+                <div class="setlist-header p-4 d-flex justify-content-between align-items-center"
+                    style="background: color-mix(in srgb, var(--bs-primary) 8%, transparent);">
+                    <div>
+                        <h6 class="fw-bold mb-1">
+                            <i class="bi bi-calendar-event me-1 text-primary"></i>
+                            {{ last_setlist.title }}
+                        </h6>
+                        <small class="text-muted">{{ last_setlist.date|date:"d \d\e F \d\e Y" }}</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill px-3">{{ last_setlist.date|date:"d M" }}</span>
+                </div>
+                <div class="p-4">
+                    <pre class="m-0"
+                        style="font-family: inherit; white-space: pre-wrap; font-size: 0.9rem;">{{ last_setlist.description }}</pre>
+                </div>
+                <div class="card-footer bg-transparent p-3 text-end border-0">
+                    <a href="#" class="btn btn-sm btn-primary rounded-pill px-4">
+                        <i class="bi bi-eye me-1"></i>Ver Detalhes
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="card-body p-5 text-center">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-music-note-beamed"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Nenhum Setlist Criado</h5>
+                <p class="text-muted small mb-3">Crie o primeiro setlist para organizar as músicas da equipe.</p>
+                <button class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-2"></i>Novo Setlist
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Invite Code Card -->
+        <div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-warning flex-shrink-0">
+                        <i class="bi bi-link-45deg text-white"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">Código de Convite</h6>
+                        <p class="text-muted small mb-0">Compartilhe este código para adicionar novos membros à equipe.
+                        </p>
+                    </div>
+                    <div class="invite-code-box p-2 px-3 rounded-3 fw-bold font-monospace fs-5"
+                        style="background: color-mix(in srgb, var(--bs-warning) 15%, transparent); color: var(--bs-warning);">
+                        {{ team.code }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Banner */
+    .team-detail-banner {
+        min-height: 160px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 12%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 12%, transparent));
+    }
+
+    .team-detail-banner-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .team-detail-banner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    }
+
+    .team-detail-banner-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Stats */
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Members */
+    .member-list {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .member-item {
+        border-bottom: 1px solid var(--border-color, #f0f0f0);
+        transition: background 0.2s ease;
+    }
+
+    .member-item:last-child {
+        border-bottom: none;
+    }
+
+    .member-item:hover {
+        background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
+    }
+
+    .member-leader {
+        background: color-mix(in srgb, var(--bs-primary) 4%, transparent);
+    }
+
+    /* Empty State */
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--bs-primary);
+        opacity: 0.5;
+    }
+</style>
+
+{% if request.user == team.leader %}
+<!-- Modal: Enviar Aviso -->
+<div class="modal fade" id="sendAnnouncementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-megaphone-fill text-primary me-2"></i>Enviar aviso para a equipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'send_team_announcement' team.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <textarea name="message" class="form-control" rows="4" placeholder="Escreva a mensagem para todos os membros..."></textarea>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-send-fill me-1"></i>Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

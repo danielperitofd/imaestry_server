@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Excluir Usuário{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Configurações</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'settings_users' %}">Usuários</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Excluir</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+            <div class="mb-3 text-danger">
+                <i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-3">Tem certeza?</h4>
+            <p class="text-muted mb-4">
+                Você esta prestes a excluir o usuário <strong>{{ user_to_delete.username }}</strong>.<br>
+                Esta ação não poderá ser desfeita.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                <a href="{% url 'settings_users' %}" class="btn btn-light rounded-pill px-4 me-2">Cancelar</a>
+                <button type="submit" class="btn btn-danger px-4 rounded-pill fw-bold">Sim, Excluir</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

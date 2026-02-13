@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Configurações{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Configurações</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Configurações</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Gerenciar Usuários -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'settings_users' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 hover-shadow transition">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-people-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Gerenciar Usuários</h5>
+                    <p class="text-muted small mb-0">Visualizar e editar usuários do sistema</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Configurar APIs -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'apis_config' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 hover-shadow transition">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-key-fill text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Configurar APIs</h5>
+                    <p class="text-muted small mb-0">Configurar chaves de APIs externas</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Manutenção do Banco -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'manutencao_banco' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 hover-shadow transition">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-database-gear text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Manutenção do Banco</h5>
+                    <p class="text-muted small mb-0">Exportar e importar dados do sistema</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Personalização de Cores -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'theme_settings' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 hover-shadow transition">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-palette-fill" style="font-size: 3rem; color: var(--primary-color);"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Paleta de Cores</h5>
+                    <p class="text-muted small mb-0">Personalizar as cores do sistema</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .transition {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}

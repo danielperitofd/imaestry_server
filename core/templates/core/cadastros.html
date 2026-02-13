@@ -1,0 +1,165 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cadastros | iMaestro{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="card shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="cadastros-banner p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-database-fill me-2"></i>Cadastros
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Cadastros</li>
+                    </ol>
+                </nav>
+            </div>
+            <p class="mb-0 opacity-75 small">Gerencie músicos, instituições e categorias.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Cards -->
+<div class="row g-4">
+    <!-- Cadastrar Músico -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'musician_registration' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 cadastro-card overflow-hidden">
+                <div class="cadastro-card-accent bg-primary"></div>
+                <div class="card-body p-4 text-center">
+                    <div class="cadastro-icon mx-auto mb-3 bg-primary">
+                        <i class="bi bi-person-plus-fill text-white"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Cadastrar Músico</h5>
+                    <p class="text-muted small mb-3">Adicione um novo músico ao sistema com foto, habilidades e acesso.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">
+                            <i class="bi bi-person me-1"></i>Perfil
+                        </span>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">
+                            <i class="bi bi-music-note me-1"></i>Habilidades
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center py-3 border-0">
+                    <small class="fw-bold text-primary">
+                        Cadastrar <i class="bi bi-arrow-right ms-1"></i>
+                    </small>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Cadastrar Instituição -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm rounded-4 h-100 cadastro-card overflow-hidden position-relative">
+            <div class="cadastro-card-accent bg-success"></div>
+
+            <!-- Manage gear icon -->
+            <a href="{% url 'institution_list' %}" class="position-absolute top-0 end-0 m-3 text-muted"
+                style="z-index: 10; font-size: 1.2rem;" title="Gerenciar Instituições">
+                <i class="bi bi-gear-fill"></i>
+            </a>
+
+            <a href="{% url 'institution_registration' %}" class="text-decoration-none">
+                <div class="card-body p-4 text-center">
+                    <div class="cadastro-icon mx-auto mb-3 bg-success">
+                        <i class="bi bi-building text-white"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Cadastrar Instituição</h5>
+                    <p class="text-muted small mb-3">Registre igrejas, escolas e organizações vinculadas às equipes.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3">
+                            <i class="bi bi-building me-1"></i>Local
+                        </span>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3">
+                            <i class="bi bi-people me-1"></i>Equipes
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center py-3 border-0">
+                    <small class="fw-bold text-success">
+                        Cadastrar <i class="bi bi-arrow-right ms-1"></i>
+                    </small>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Categorias de Músicas -->
+    <div class="col-md-6 col-lg-4">
+        <a href="{% url 'music_categories' %}" class="text-decoration-none">
+            <div class="card shadow-sm rounded-4 h-100 cadastro-card overflow-hidden">
+                <div class="cadastro-card-accent bg-warning"></div>
+                <div class="card-body p-4 text-center">
+                    <div class="cadastro-icon mx-auto mb-3 bg-warning">
+                        <i class="bi bi-tags-fill text-white"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Categorias de Músicas</h5>
+                    <p class="text-muted small mb-3">Organize seu repertório com categorias e subcategorias
+                        personalizadas.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3">
+                            <i class="bi bi-tag me-1"></i>Categorias
+                        </span>
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3">
+                            <i class="bi bi-diagram-3 me-1"></i>Sub
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-center py-3 border-0">
+                    <small class="fw-bold text-warning">
+                        Gerenciar <i class="bi bi-arrow-right ms-1"></i>
+                    </small>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Banner */
+    .cadastros-banner {
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--bs-primary) 10%, transparent),
+                color-mix(in srgb, var(--bs-secondary, #36C2D7) 10%, transparent));
+    }
+
+    /* Cadastro Cards */
+    .cadastro-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .cadastro-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .cadastro-card:hover .cadastro-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .cadastro-card-accent {
+        height: 5px;
+    }
+
+    .cadastro-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

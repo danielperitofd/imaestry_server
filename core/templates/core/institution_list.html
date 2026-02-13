@@ -1,0 +1,127 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Gerenciar Instituições{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Gerenciar Instituições</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cadastros' %}">Cadastros</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Instituições</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">
+            <i class="bi bi-buildings me-2"></i>
+            Instituições Cadastradas
+        </h5>
+        <a href="{% url 'institution_registration' %}" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-lg me-2"></i>Nova Instituição
+        </a>
+    </div>
+
+    {% if institutions %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Foto</th>
+                    <th>Nome</th>
+                    <th>Responsável</th>
+                    <th>Telefone</th>
+                    <th>Endereço</th>
+                    <th style="width: 150px;" class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for institution in institutions %}
+                <tr>
+                    <td>
+                        {% if institution.photo %}
+                        <img src="{{ institution.photo.url }}" class="rounded"
+                            style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-building text-white fs-4"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="fw-bold">{{ institution.name }}</td>
+                    <td>{{ institution.responsible_name }}</td>
+                    <td>{{ institution.phone }}</td>
+                    <td>{{ institution.address }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'institution_edit' institution.id %}"
+                            class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ institution.id }}" title="Excluir">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal{{ institution.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content rounded-4">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title fw-bold">Confirmar Exclusão</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Tem certeza que deseja excluir a instituição <strong>{{ institution.name }}</strong>?</p>
+                                        <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+                                    </div>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-secondary rounded-pill"
+                                            data-bs-dismiss="modal">Cancelar</button>
+                                        <form method="post" action="{% url 'institution_delete' institution.id %}"
+                                            class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger rounded-pill">Excluir</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
+        <p class="text-muted mt-3 mb-4">Nenhuma instituição cadastrada ainda.</p>
+        <a href="{% url 'institution_registration' %}" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-lg me-2"></i>Cadastrar Primeira Instituição
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    {% for message in messages %}
+    <div class="toast show align-items-center text-white bg-{{ message.tags }} border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                {{ message }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

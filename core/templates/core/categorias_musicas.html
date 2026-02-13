@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Categorias de Músicas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold">Cadastros</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cadastros' %}">Cadastros</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Categorias</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+{% if messages %}
+<div class="row mb-3">
+    <div class="col-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Categories Section -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">Categorias</h5>
+                    <p class="text-muted mb-0 small">Ex: Adoração, Exaltação</p>
+                </div>
+                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="bi bi-plus-lg me-1"></i> Nova
+                </button>
+            </div>
+
+            {% if categories %}
+            <div class="list-group list-group-flush">
+                {% for cat in categories %}
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                    <div>
+                        <span class="fw-bold">{{ cat.name }}</span>
+                        <small class="text-muted ms-2">({{ cat.subcategories.count }} subcategorias)</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary edit-category-btn" title="Editar"
+                            data-category-id="{{ cat.id }}" data-category-name="{{ cat.name }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form method="post" action="{% url 'delete_category' cat.id %}" class="d-inline"
+                            onsubmit="return confirm('Excluir categoria {{ cat.name }}?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-folder2-open fs-1 opacity-50"></i>
+                <p class="mt-2 mb-0">Nenhuma categoria cadastrada</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Subcategories Section -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">Subcategorias</h5>
+                    <p class="text-muted mb-0 small">Ex: Evangelismo, Festa, Consagração</p>
+                </div>
+                <button class="btn btn-success rounded-pill" data-bs-toggle="modal"
+                    data-bs-target="#addSubcategoryModal">
+                    <i class="bi bi-plus-lg me-1"></i> Nova
+                </button>
+            </div>
+
+            {% if subcategories %}
+            <div class="list-group list-group-flush">
+                {% for sub in subcategories %}
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                    <div>
+                        <span class="fw-bold">{{ sub.name }}</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary edit-subcategory-btn" title="Editar"
+                            data-subcategory-id="{{ sub.id }}" data-subcategory-name="{{ sub.name }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form method="post" action="{% url 'delete_subcategory' sub.id %}" class="d-inline"
+                            onsubmit="return confirm('Excluir subcategoria {{ sub.name }}?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-tags fs-1 opacity-50"></i>
+                <p class="mt-2 mb-0">Nenhuma subcategoria cadastrada</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'save_category' %}">
+                {% csrf_token %}
+                <input type="hidden" name="category_id" id="editCategoryId" value="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalTitle">Nova Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome da Categoria</label>
+                        <input type="text" name="name" id="categoryName" class="form-control" placeholder="Ex: Adoração"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Subcategory Modal -->
+<div class="modal fade" id="addSubcategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'save_subcategory' %}">
+                {% csrf_token %}
+                <input type="hidden" name="subcategory_id" id="editSubcategoryId" value="">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subcategoryModalTitle">Nova Subcategoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome da Subcategoria</label>
+                        <input type="text" name="name" id="subcategoryName" class="form-control"
+                            placeholder="Ex: Evangelismo" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Event listeners for edit category buttons
+    document.querySelectorAll('.edit-category-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-category-id');
+            const name = this.getAttribute('data-category-name');
+
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('categoryName').value = name;
+            document.getElementById('categoryModalTitle').textContent = 'Editar Categoria';
+            new bootstrap.Modal(document.getElementById('addCategoryModal')).show();
+        });
+    });
+
+    // Event listeners for edit subcategory buttons
+    document.querySelectorAll('.edit-subcategory-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-subcategory-id');
+            const name = this.getAttribute('data-subcategory-name');
+
+            document.getElementById('editSubcategoryId').value = id;
+            document.getElementById('subcategoryName').value = name;
+            document.getElementById('subcategoryModalTitle').textContent = 'Editar Subcategoria';
+            new bootstrap.Modal(document.getElementById('addSubcategoryModal')).show();
+        });
+    });
+
+    // Reset modals on close
+    document.getElementById('addCategoryModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('editCategoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryModalTitle').textContent = 'Nova Categoria';
+    });
+
+    document.getElementById('addSubcategoryModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('editSubcategoryId').value = '';
+        document.getElementById('subcategoryName').value = '';
+        document.getElementById('subcategoryModalTitle').textContent = 'Nova Subcategoria';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% comment %} Shared sidebar content for desktop and mobile offcanvas {% endcomment %}
+{% load user_urls %}
+
+<!-- User Profile -->
+<div class="user-profile">
+  <div class="user-avatar">
+    {% if user_musician and user_musician.photo %}
+      <img src="{{ user_musician.photo.url }}" class="rounded-circle" alt="User" style="width: 100%; height: 100%; object-fit: cover;">
+    {% else %}
+      {% if request.user.is_authenticated %}
+        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; font-size: 1.2rem;">
+          {{ request.user.username|slice:":1"|upper }}
+        </div>
+      {% else %}
+        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User">
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="d-flex flex-column" style="overflow: hidden;">
+    {% if request.user.is_authenticated %}
+      <span class="fw-bold text-truncate" title="{{ request.user.get_full_name|default:request.user.username }}">
+        {{ request.user.get_full_name|default:request.user.username }}
+      </span>
+      <small class="text-muted text-truncate" style="font-size: 0.75rem;" title="{{ request.user.email }}">
+        {{ request.user.email|default:"Sem email" }}
+      </small>
+    {% else %}
+      <span class="fw-bold text-truncate">Visitante</span>
+      <small class="text-muted"><a href="/admin/">Fazer Login</a></small>
+    {% endif %}
+  </div>
+  {% if request.user.is_authenticated %}
+      {% url 'profile_edit' as edit_url %}
+      <a href="{{ edit_url }}" 
+        class="bi bi-pencil-square ms-auto text-muted"
+        style="font-size: 1rem; text-decoration: none;"
+        title="Editar Perfil"></a>
+  {% endif %}
+
+
+</div>
+
+<ul class="nav flex-column mb-auto" role="navigation" aria-label="Navegação principal">
+  <li class="nav-item">
+    <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>
+      <i class="bi bi-house-door"></i>
+      Home
+      <i class="bi bi-chevron-right ms-auto" style="font-size: 0.8rem;"></i>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-calendar-event"></i>
+      Escalas
+      <i class="bi bi-chevron-right ms-auto" style="font-size: 0.8rem;"></i>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'repertorio' %}" class="nav-link {% if request.resolver_match.url_name == 'repertorio' %}active{% endif %}" {% if request.resolver_match.url_name == 'repertorio' %}aria-current="page"{% endif %}>
+      <i class="bi bi-music-note-beamed"></i>
+      Repertório
+      <i class="bi bi-chevron-right ms-auto" style="font-size: 0.8rem;"></i>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'create_team' %}" class="nav-link {% if request.resolver_match.url_name == 'create_team' %}active{% endif %}" {% if request.resolver_match.url_name == 'create_team' %}aria-current="page"{% endif %}>
+      <i class="bi bi-people"></i>
+      Equipe
+      <i class="bi bi-chevron-right ms-auto" style="font-size: 0.8rem;"></i>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'cadastros' %}" class="nav-link {% if request.resolver_match.url_name == 'cadastros' %}active{% endif %}" {% if request.resolver_match.url_name == 'cadastros' %}aria-current="page"{% endif %}>
+      <i class="bi bi-person-plus"></i>
+      Cadastros
+      <i class="bi bi-chevron-right ms-auto" style="font-size: 0.8rem;"></i>
+    </a>
+  </li>
+</ul>
+
+<hr>
+
+<ul class="nav flex-column">
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-bar-chart-steps"></i>
+      Planejamento de Funções
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-cake2"></i>
+      Aniversariantes
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-star"></i>
+      Planos
+    </a>
+  </li>
+
+  <div class="mt-4 mb-2 ps-3 text-muted fw-bold small">Utilitários</div>
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-speedometer2"></i>
+      Metrônomo
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="#" class="nav-link">
+      <i class="bi bi-lightbulb"></i>
+      Sugestões
+    </a>
+  </li>
+</ul>
+
+<ul class="nav flex-column mt-3" role="navigation" aria-label="Administração">
+  {% if request.user.is_staff %}
+    <li class="nav-item">
+      <a href="{% url 'configuracoes' %}" class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active{% endif %}" {% if request.resolver_match.url_name == 'configuracoes' %}aria-current="page"{% endif %}>
+        <i class="bi bi-gear"></i>
+        Configurações
+      </a>
+    </li>
+  {% endif %}
+
+  {% if request.user.is_authenticated %}
+    <li class="nav-item mt-2">
+      <form action="{% url 'logout' %}" method="post" class="w-100">
+        {% csrf_token %}
+        <button type="submit" class="nav-link w-100 text-start text-danger border-0 bg-transparent">
+          <i class="bi bi-box-arrow-right"></i>
+          Sair
+        </button>
+      </form>
+    </li>
+  {% endif %}
+</ul>

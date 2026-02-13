@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Excluir Equipe | iMaestro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm rounded-4 overflow-hidden">
+      <div class="card-header py-3 border-0">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-trash3-fill text-danger me-2"></i>
+          Excluir Equipe
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <p class="mb-3">Tem certeza que deseja excluir a equipe <span class="fw-bold">"{{ team.name }}"</span>?</p>
+
+        <div class="p-3 rounded-3 mb-3" style="background: color-mix(in srgb, var(--bs-warning) 10%, transparent);">
+          <div class="d-flex flex-wrap gap-3 small">
+            <span class="badge bg-light text-dark border">Membros (exceto líder): {{ non_leader_members }}</span>
+            <span class="badge bg-light text-dark border">Setlists: {{ setlists_count }}</span>
+          </div>
+          {% if deletable_by_leader %}
+          <small class="text-muted d-block mt-2">Sem membros adicionais e sem setlists: o líder pode excluir sem senha de staff.</small>
+          {% else %}
+          <small class="text-muted d-block mt-2">Há membros e/ou setlists. Para prosseguir é necessário um usuário <strong>staff</strong> confirmar a exclusão com sua senha.</small>
+          {% endif %}
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          {% if not deletable_by_leader %}
+          <div class="mb-3">
+            <label class="form-label fw-bold">Senha de staff</label>
+            <input type="password" name="staff_password" class="form-control" placeholder="Digite sua senha de staff" autocomplete="current-password">
+            <small class="text-muted">Somente usuários com permissão de staff podem confirmar.</small>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <a href="{% url 'team_detail' team.id %}" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+            <button type="submit" class="btn btn-danger rounded-pill px-4">
+              <i class="bi bi-trash3 me-1"></i> Excluir definitivamente
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Avisos | iMaestro{% endblock %}
+
+{% block content %}
+<div class="row g-3 align-items-end mb-3">
+  <div class="col-md-6">
+    <h5 class="fw-bold mb-1"><i class="bi bi-bell-fill text-primary me-2"></i>Avisos</h5>
+    <p class="text-muted small mb-0">Mensagens enviadas pelos líderes das equipes que você participa.</p>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label small fw-bold text-muted">Equipe</label>
+    <form method="get" id="filtersForm">
+      <select name="team" class="form-select" onchange="document.getElementById('filtersForm').submit()">
+        <option value="">Todas</option>
+        {% for t in teams %}
+        <option value="{{ t.id }}" {% if selected_team == t.id %}selected{% endif %}>{{ t.name }}</option>
+        {% endfor %}
+      </select>
+      {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+    </form>
+  </div>
+  <div class="col-md-3">
+    <form method="get" class="d-flex" role="search">
+      {% if selected_team %}<input type="hidden" name="team" value="{{ selected_team }}">{% endif %}
+      <input class="form-control me-2" type="search" name="q" value="{{ q }}" placeholder="Buscar mensagem...">
+      <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm rounded-4 overflow-hidden">
+  <div class="list-group list-group-flush">
+    {% if announcements %}
+      {% for a in announcements %}
+      <div class="list-group-item d-flex align-items-start gap-3 announcement-row announcement-item collapsed" style="background: var(--card-bg)">
+        <div class="announcement-icon flex-shrink-0">
+          <i class="bi bi-megaphone text-primary"></i>
+        </div>
+        <div class="flex-grow-1 min-width-0">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-light text-dark border rounded-pill px-2 team-chip">{{ a.team.name }}</span>
+            </div>
+            <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ a.created_at|date:"d/m/Y H:i" }}</small>
+          </div>
+          <div class="announcement-text small">{{ a.message }}</div>
+          <div class="d-flex justify-content-between align-items-center mt-2 announcement-actions">
+            <div class="d-flex align-items-center gap-2 left-group">
+              <form method="post" action="{% url 'toggle_announcement_like' a.id %}" class="m-0 p-0">
+                {% csrf_token %}
+                <button class="btn btn-sm icon-btn {% if a.id in liked_ids %}text-danger{% else %}text-muted{% endif %}" data-bs-toggle="tooltip" title="Curtir">
+                  <i class="bi {% if a.id in liked_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                  <span class="small">{{ a.likes.count }}</span>
+                </button>
+              </form>
+              <button type="button" class="btn btn-link p-0 small announcement-toggle">Ver mais</button>
+            </div>
+            <form method="post" action="{% url 'dismiss_announcement' a.id %}" class="m-0 p-0 right-group">
+              {% csrf_token %}
+              <button class="btn btn-sm icon-btn text-muted" data-bs-toggle="tooltip" title="Dispensar"><i class="bi bi-x-lg"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="p-4 text-center text-muted">Nenhum aviso pendente.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3" aria-label="Paginação de avisos">
+  <ul class="pagination pagination-sm">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+    {% endif %}
+
+    <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<style>
+  .announcement-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; background: color-mix(in srgb, var(--bs-primary) 15%, transparent); }
+  .announcement-text { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; line-height: 1.25rem; }
+  .icon-btn { background: transparent; border: none; }
+  .team-chip { max-width: 240px; text-overflow: ellipsis; overflow: hidden; }
+  .announcement-row:hover { background: color-mix(in srgb, var(--bs-primary) 5%, var(--card-bg, #fff)); }
+  .announcement-actions .btn-link { color: var(--bs-primary); text-decoration: none; }
+  .announcement-actions .btn-link:hover { text-decoration: underline; }
+  .announcement-actions { gap: .25rem; flex-wrap: nowrap; }
+  .announcement-actions .icon-btn { display: inline-flex; align-items: center; gap: .25rem; line-height: 1; }
+  .left-group { flex: 1 1 auto; min-width: 0; }
+  .right-group { flex: 0 0 auto; }
+  /* Clamp em todos os tamanhos quando colapsado */
+  .announcement-item.collapsed .announcement-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+  }
+  @media (max-width: 576px) {
+    .team-chip { max-width: 140px; }
+  }
+  @media (max-width: 430px) {
+    .announcement-icon { width: 30px; height: 30px; }
+    .team-chip { max-width: 120px; font-size: .8rem; }
+    .announcement-text { font-size: .95rem; }
+    .announcement-actions .btn-link { font-size: .9rem; }
+    .announcement-actions .icon-btn { padding: 2px 6px; min-width: 28px; }
+  }
+</style>
+
+<script>
+  // Enable Bootstrap tooltips + toggle ver mais
+  document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    document.querySelectorAll('.announcement-toggle').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const item = this.closest('.announcement-item');
+        const collapsed = item.classList.toggle('collapsed');
+        this.textContent = collapsed ? 'Ver mais' : 'Ver menos';
+      });
+    });
+  });
+</script>
+{% endblock %}

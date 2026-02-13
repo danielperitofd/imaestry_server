@@ -1,0 +1,284 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Repertório{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                    <i class="bi bi-music-note-list me-1"></i> Repertório
+                </span>
+                <div>
+                    <h4 class="fw-bold mb-0">Repertório</h4>
+                    <p class="text-muted small mb-0">Todas as músicas cadastradas no sistema.</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+                <a href="{% url 'import_spotify' %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-spotify me-1"></i> Importar
+                </a>
+                <a href="{% url 'add_music_search' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Adicionar Música
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-6">
+            <label class="form-label fw-bold small">Buscar no repertório</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Digite título ou artista..."
+                onkeyup="filterTable()">
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label fw-bold small">Ordenar por</label>
+            <select id="sortBy" class="form-select" onchange="sortTable()">
+                <option value="title">Título (A-Z)</option>
+                <option value="artist">Artista (A-Z)</option>
+                <option value="category">Categoria</option>
+                <option value="key">Tom</option>
+                <option value="date">Data de adição</option>
+            </select>
+        </div>
+        <div class="col-6 col-lg-3 text-end">
+            <span class="badge text-bg-secondary rounded-pill px-3 py-2">
+                <i class="bi bi-music-note-beamed me-1"></i> {{ musics|length }} músicas
+            </span>
+        </div>
+    </div>
+</div>
+
+{% if musics %}
+<!-- Music Table -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" id="musicTable">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Título</th>
+                    <th>Artista</th>
+                    <th>Categoria</th>
+                    <th class="text-center">Tom</th>
+                    <th class="text-center">BPM</th>
+                    <th class="text-center">Links</th>
+                    <th class="text-center">Adicionado</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for music in musics %}
+                <tr data-title="{{ music.title|lower }}" data-artist="{{ music.artist|lower }}"
+                    data-key="{{ music.key|default:'' }}" data-date="{{ music.created_at|date:'Y-m-d' }}"
+                    data-category="{{ music.category.name|lower|default:'' }}"
+                    data-subcategory="{{ music.subcategory.name|lower|default:'' }}">
+                    <td class="ps-4">
+                        <div class="fw-bold">{{ music.title }}</div>
+                    </td>
+                    <td>
+                        <span class="text-muted">{{ music.artist }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            {% if music.category %}
+                            <span class="badge text-bg-light border text-dark mb-1">{{ music.category.name }}</span>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+
+                            {% if music.subcategory %}
+                            <small class="text-muted">{{ music.subcategory.name }}</small>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if music.key %}
+                        <span class="badge text-bg-primary rounded-pill">{{ music.key }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if music.bpm %}
+                        <span class="badge text-bg-secondary rounded-pill">{{ music.bpm }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1">
+                            {% if music.spotify_url %}
+                            <a href="{{ music.spotify_url }}" target="_blank" class="btn btn-sm btn-outline-success"
+                                title="Spotify">
+                                <i class="bi bi-spotify"></i>
+                            </a>
+                            {% endif %}
+                            {% if music.youtube_url %}
+                            <a href="{{ music.youtube_url }}" target="_blank" class="btn btn-sm btn-outline-danger"
+                                title="YouTube">
+                                <i class="bi bi-youtube"></i>
+                            </a>
+                            {% endif %}
+                            {% if music.deezer_url %}
+                            <a href="{{ music.deezer_url }}" target="_blank" class="btn btn-sm btn-outline-secondary"
+                                title="Deezer">
+                                <i class="bi bi-music-note-list"></i>
+                            </a>
+                            {% endif %}
+                            {% if music.cifra_url %}
+                            <a href="{{ music.cifra_url }}" target="_blank" class="btn btn-sm btn-outline-warning"
+                                title="Cifra Club">
+                                <i class="bi bi-music-note"></i>
+                            </a>
+                            {% endif %}
+                            {% if music.letras_url %}
+                            <a href="{{ music.letras_url }}" target="_blank" class="btn btn-sm btn-outline-info"
+                                title="Letras">
+                                <i class="bi bi-type"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <small class="text-muted">{{ music.created_at|date:"d/m/Y" }}</small>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger delete-music-btn" data-music-id="{{ music.id }}"
+                            title="Excluir">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="card border-0 bg-light rounded-4">
+    <div class="card-body text-center py-5">
+        <div class="display-6 mb-2 text-muted"><i class="bi bi-music-note-list"></i></div>
+        <div class="fw-semibold">Nenhuma música cadastrada</div>
+        <div class="text-muted small mb-3">Comece adicionando músicas ao seu repertório.</div>
+        <a href="{% url 'add_music_search' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Adicionar Primeira Música
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir esta música do repertório?</p>
+                <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let musicToDelete = null;
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+    function filterTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#musicTable tbody tr');
+
+        rows.forEach(row => {
+            const title = row.getAttribute('data-title');
+            const artist = row.getAttribute('data-artist');
+            const category = row.getAttribute('data-category');
+            const subcategory = row.getAttribute('data-subcategory');
+
+            if (title.includes(input) || artist.includes(input) || category.includes(input) || subcategory.includes(input)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function sortTable() {
+        const sortBy = document.getElementById('sortBy').value;
+        const tbody = document.querySelector('#musicTable tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            let aVal, bVal;
+            if (sortBy === 'title') {
+                aVal = a.getAttribute('data-title');
+                bVal = b.getAttribute('data-title');
+            } else if (sortBy === 'artist') {
+                aVal = a.getAttribute('data-artist');
+                bVal = b.getAttribute('data-artist');
+            } else if (sortBy === 'category') {
+                aVal = a.getAttribute('data-category');
+                bVal = b.getAttribute('data-category');
+            } else if (sortBy === 'key') {
+                aVal = a.getAttribute('data-key') || 'zzz';
+                bVal = b.getAttribute('data-key') || 'zzz';
+            } else if (sortBy === 'date') {
+                aVal = a.getAttribute('data-date');
+                bVal = b.getAttribute('data-date');
+                return bVal.localeCompare(aVal); // Newest first
+            }
+            return aVal.localeCompare(bVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Attach event listeners to all delete buttons
+    document.querySelectorAll('.delete-music-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const musicId = btn.getAttribute('data-music-id');
+            musicToDelete = musicId;
+            deleteModal.show();
+        });
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+        if (!musicToDelete) return;
+
+        try {
+            const response = await fetch(`/musicas/excluir/${musicToDelete}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Erro ao excluir música.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao excluir música.');
+        }
+
+        deleteModal.hide();
+    });
+</script>
+{% endblock %}

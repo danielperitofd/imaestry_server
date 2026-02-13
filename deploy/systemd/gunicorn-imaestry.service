@@ -11,7 +11,7 @@ Environment="DJANGO_SETTINGS_MODULE=imaestry.settings"
 EnvironmentFile=/var/www/imaestry_server/.env
 ExecStart=/var/www/imaestry_server/.venv/bin/gunicorn \
   --workers 3 \
-  --bind unix:/run/gunicorn-imaestry.sock \
+  --bind unix:/var/www/imaestry_server/imaestry.sock \
   --access-logfile - \
   --error-logfile - \
   imaestry.wsgi:application
